@@ -1,3 +1,4 @@
+import pdb
 from random import randrange
 from typing import List
 
@@ -15,6 +16,8 @@ def get_lists(n: int) -> List[List]:
     b = [100 for _ in range(n)]
     c = [100 for _ in range(n)]
     d = [100 for _ in range(n)]
+    # test pdb abilities
+    pdb.set_trace()
     idx = randrange(n)
     for i in range(n):
         a[idx] = tmp
