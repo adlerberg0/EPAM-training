@@ -1,10 +1,13 @@
 from collections.abc import Sequence
 
 import pytest
-from seqtest.check_fib import check_fibonacci1, check_fibonacci2
+from task2.check_fib import check_fibonacci1, check_fibonacci2
 
 
 def fib(n: int):
+    """
+    fib number generator
+    """
     a, b = 0, 1
     for _ in range(n):
         yield a
@@ -26,13 +29,9 @@ def fib(n: int):
         ([-1] + list(fib(6)), False),
     ],
 )
-def test_fib1(value: Sequence[int], expected_result: bool):
-    actual_result = check_fibonacci1(value)
-
-    assert actual_result == expected_result
-
-
-def test_fib2(value: Sequence[int], expected_result: bool):
-    actual_result = check_fibonacci2(value)
-
-    assert actual_result == expected_result
+def test_fib(value: Sequence[int], expected_result: bool):
+    # test 2 alternative functions
+    actual_result1 = check_fibonacci1(value)
+    actual_result2 = check_fibonacci2(value)
+    result = actual_result1 == expected_result and actual_result2 == expected_result
+    assert result

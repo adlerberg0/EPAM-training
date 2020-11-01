@@ -1,2 +1,7 @@
+pre-commit
+typing
 pytest
 pytest-sugar
+collections
+math
+random
