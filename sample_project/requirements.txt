@@ -1,7 +1,6 @@
 pre-commit
-typing
+black
+isort
+flake8
 pytest
 pytest-sugar
-collections
-math
-random
