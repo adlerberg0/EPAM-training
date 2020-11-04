@@ -13,13 +13,16 @@ from typing import Tuple
 
 
 def find_maximum_and_minimum(file_name: str) -> Tuple[int, int]:
-    min_val = 100000000000
-    max_val = -100000000000
+    min_val = None
+    max_val = None
     with open(file_name) as fi:
         for line in fi:
+            if max_val is None and min_val is None:
+                max_val = min_val = int(line)
+                continue
             tmp = int(line)
-            if tmp < min_val:
+            if tmp <= min_val:
                 min_val = tmp
-            if tmp > max_val:
+            elif tmp > max_val:
                 max_val = tmp
     return min_val, max_val

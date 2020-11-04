@@ -5,7 +5,7 @@ import pytest
 from task5.max_sum import find_maximal_sub_array_sum
 
 
-def get_list(max_list, list_len):
+def get_list(max_list: int, list_len: int) -> List:
     """
     :param max_list: embed this list in row in result list
     :param list_len: len of result list
@@ -37,7 +37,12 @@ def get_list(max_list, list_len):
     [
         (get_list([10, 12, 15], 10), sum([10, 12, 15])),
         (get_list([30, 40, 50], 20), sum([30, 40, 50])),
-        (get_list([-10, -30, -40, -50], 100), sum([-10, -30, -40, -50])),
+        ([[1, 1, -1, 10, 3, 2, 1], 3], 15),
+        ([[100, 1, -1, 10, 3, 2, 1], 3], 101),
+        (get_list([-10, -30, -50], 100), -10),
+        (get_list([-1, -3, -50], 100), -1),
+        (get_list([-10, -30, -50], 100), -10),
+        (get_list([-1, -3, -50], 100), -1),
     ],
 )
 def test_count_zero_sum(value: List[List], expected_result: int):
