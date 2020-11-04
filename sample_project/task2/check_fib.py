@@ -14,22 +14,16 @@ def check_fibonacci1(data: Sequence[int]) -> bool:
     normal way to check fib sequence
     """
     res = True
-    prev1 = 0
-    prev2 = 0
+    num_1 = 0
+    num_2 = 1
+    while data[0] > num_1:
+        num_1, num_2 = num_2, num_1 + num_2
     for i, item in enumerate(data):
-        if i == 0:
-            if item != 0:
-                res = False
-                break
-        elif i == 1:
-            if item != 1:
-                res = False
-                break
-        elif item != prev1 + prev2:
+        if item != num_1:
             res = False
             break
-        prev2 = prev1
-        prev1 = item
+        num_1, num_2 = num_2, num_1 + num_2
+
     return res
 
 

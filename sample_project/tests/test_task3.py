@@ -7,7 +7,7 @@ import pytest
 from task3.extrema import find_maximum_and_minimum
 
 
-def gen_file(name: str, nums: Sequence[int], count: int):
+def gen_file(name: str, nums: Sequence[int], count: int) -> str:
     """
     :param name:  name of new file with test data
     :param nums:  arr with min and max values of test data
@@ -17,8 +17,8 @@ def gen_file(name: str, nums: Sequence[int], count: int):
     f = open(name, "w")
     min_val = nums[0]
     max_val = nums[1]
-    min_idx = randrange(count)
-    max_idx = randrange(count)
+    min_idx = randrange(count - 1)
+    max_idx = randrange(count - 1)
     if min_idx == max_idx:
         max_idx += 1
         if max_idx > count:
