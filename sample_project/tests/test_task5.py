@@ -1,11 +1,11 @@
 from random import randrange
-from typing import List
+from typing import Any, List, Sequence
 
 import pytest
 from task5.max_sum import find_maximal_sub_array_sum
 
 
-def get_list(max_list: int, list_len: int) -> List:
+def get_list(max_list: List[int], list_len: int) -> Sequence[Any]:  # noqa
     """
     :param max_list: embed this list in row in result list
     :param list_len: len of result list
@@ -45,7 +45,7 @@ def get_list(max_list: int, list_len: int) -> List:
         (get_list([-1, -3, -50], 100), -1),
     ],
 )
-def test_count_zero_sum(value: List[List], expected_result: int):
+def test_count_zero_sum(value: Sequence[Any], expected_result: int):
     actual_result = find_maximal_sub_array_sum(value[0], value[1])
 
     assert actual_result == expected_result
