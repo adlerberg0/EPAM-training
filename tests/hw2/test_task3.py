@@ -1,7 +1,8 @@
 from typing import Any, Sequence
 
 import pytest
-from task3.hw3 import combinations
+
+from hw2.task3.obtain_permutations import combinations
 
 
 @pytest.mark.parametrize(

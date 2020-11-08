@@ -1,7 +1,8 @@
 from typing import Any, List, Tuple
 
 import pytest
-from task2.hw2 import major_and_minor_elem
+
+from hw2.task2.array_data_estimation import major_and_minor_elem
 
 
 @pytest.mark.parametrize(

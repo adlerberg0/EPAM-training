@@ -1,11 +1,12 @@
 from typing import Any, Sequence
 
 import pytest
-from task1.hw1 import count_non_ascii_chars  # noqa
-from task1.hw1 import count_punctuation_chars  # noqa
-from task1.hw1 import get_longest_diverse_words  # noqa
-from task1.hw1 import get_most_common_non_ascii_char  # noqa
-from task1.hw1 import get_rarest_char  # noqa
+
+from hw2.task1.deal_with_unicode import count_non_ascii_chars  # noqa
+from hw2.task1.deal_with_unicode import count_punctuation_chars  # noqa
+from hw2.task1.deal_with_unicode import get_longest_diverse_words  # noqa
+from hw2.task1.deal_with_unicode import get_most_common_non_ascii_char  # noqa
+from hw2.task1.deal_with_unicode import get_rarest_char  # noqa
 
 tmp_list1 = [
     "Bevölkerungsabschub,",
@@ -25,7 +26,7 @@ tmp_list2 = ["»", "«", "—", ",", ".", "-", "?", ";", ":", "›", "‹", "'",
 @pytest.mark.parametrize(
     ["value", "expected_result"],
     [
-        ("data.txt", [tmp_list1, "›", tmp_list2, 2972, "ä"]),
+        (r".\tests\hw2\data.txt", [tmp_list1, "›", tmp_list2, 2972, "ä"]),
     ],
 )
 def test_task1(value: str, expected_result: Sequence[Any]):

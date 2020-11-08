@@ -1,7 +1,8 @@
 from typing import Callable, Tuple
 
 import pytest
-from task4.hw4 import cache
+
+from hw2.task4.keep_result import cache
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,8 @@ from random import randrange
 from typing import List
 
 import pytest
-from task4.count_zero_sum import check_sum_of_four
+
+from hw1.task4.count_zero_sum import check_sum_of_four
 
 
 def get_lists(n: int) -> List[List]:

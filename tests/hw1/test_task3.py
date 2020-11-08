@@ -4,7 +4,8 @@ from random import randrange
 from typing import Tuple
 
 import pytest
-from task3.extrema import find_maximum_and_minimum
+
+from hw1.task3.extrema import find_maximum_and_minimum
 
 
 def gen_file(name: str, nums: Sequence[int], count: int) -> str:

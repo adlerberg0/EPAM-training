@@ -2,7 +2,8 @@ import string
 from typing import Any, Sequence
 
 import pytest
-from task5.hw5 import custom_range
+
+from hw2.task5.craft_function import custom_range
 
 
 @pytest.mark.parametrize(
