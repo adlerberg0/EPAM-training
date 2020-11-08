@@ -17,10 +17,10 @@ assert = custom_range(string.ascii_lowercase, 'p', 'g', -2) == ['p', 'n', 'l', '
 from typing import Any, Sequence
 
 
-def custom_range(chars: Sequence[Any], *args: Sequence[Any]) -> Sequence[Any]:
+def custom_range(data: Sequence[Any], *args: Sequence[Any]) -> Sequence[Any]:
     # bind chars and their indexes
     idx_dict = {}
-    for i, item in enumerate(chars):
+    for i, item in enumerate(data):
         idx_dict[item] = i
     # init indexes for range
     args_len = len(args)
@@ -37,4 +37,4 @@ def custom_range(chars: Sequence[Any], *args: Sequence[Any]) -> Sequence[Any]:
         first_idx = idx_dict[args[0]]
         last_idx = idx_dict[args[1]]
         step = int(args[2])
-    return list(chars[first_idx:last_idx:step])
+    return list(data[first_idx:last_idx:step])

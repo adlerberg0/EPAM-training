@@ -18,8 +18,12 @@ from typing import Any, List
 
 
 def combinations(*args: List[Any]) -> List[List]:
-    # use nested list comprehension to get all combinations
+    # do not use nested list comprehension to get all combinations
     res_list = [[]]
-    for i, list_instance in enumerate(args):
-        res_list = [x + [y] for x in res_list for y in list_instance]
+    for list_instance in args:
+        new_res_list = []
+        for item in res_list:
+            for y in list_instance:
+                new_res_list += [item + [y]]
+        res_list = new_res_list
     return res_list
