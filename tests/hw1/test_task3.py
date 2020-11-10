@@ -35,18 +35,24 @@ def gen_file(name: str, nums: Sequence[int], count: int) -> str:
     return name
 
 
+@pytest.fixture
+def value(request):
+    file_name = gen_file(*request.param)
+    yield file_name
+    os.remove(file_name)
+
+
 @pytest.mark.parametrize(
-    ["value", "expected_result"],
+    "value, expected_result",
     [
-        (gen_file("test1.txt", [0, 10], 5), (0, 10)),
-        (gen_file("test2.txt", [-100, 100], 10), (-100, 100)),
-        (gen_file("test3.txt", [0, 100000000], 100), (0, 100000000)),
-        (gen_file("test4.txt", [-100000000, 0], 100), (-100000000, 0)),
+        (("test1.txt", [0, 10], 5), (0, 10)),
+        (("test2.txt", [-100, 100], 10), (-100, 100)),
+        (("test3.txt", [0, 100000000], 100), (0, 100000000)),
+        (("test4.txt", [-100000000, 0], 100), (-100000000, 0)),
     ],
+    indirect=["value"],
 )
 def test_extrema(value: str, expected_result: Tuple[int, int]):
     actual_result = find_maximum_and_minimum(value)
-    # del test file
-    os.remove(value)
 
     assert actual_result == expected_result
