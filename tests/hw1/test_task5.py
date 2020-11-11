@@ -2,7 +2,8 @@ from random import randrange
 from typing import Any, List, Sequence
 
 import pytest
-from task5.max_sum import find_maximal_sub_array_sum
+
+from hw1.task5.max_sum import find_maximal_sub_array_sum
 
 
 def get_list(max_list: List[int], list_len: int) -> Sequence[Any]:  # noqa

@@ -1,5 +1,6 @@
 import pytest
-from task1.calc import check_power_of_2
+
+from hw1.task1.calc import check_power_of_2
 
 
 @pytest.mark.parametrize(

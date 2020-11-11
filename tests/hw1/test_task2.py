@@ -1,7 +1,8 @@
 from typing import Iterable, Sequence
 
 import pytest
-from task2.check_fib import check_fibonacci1, check_fibonacci2
+
+from hw1.task2.check_fib import check_fibonacci1, check_fibonacci2
 
 
 def fib(n: int) -> Iterable:
