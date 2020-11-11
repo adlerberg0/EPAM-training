@@ -23,7 +23,3 @@ def is_armstrong(number: int) -> bool:
     digits_len = len(chars_list)
     digits_list = list(map(lambda s: int(s) ** digits_len, chars_list))
     return sum(digits_list) == number
-
-
-assert is_armstrong(153) is True, "Is Armstrong number"
-assert is_armstrong(10) is False, "Is not Armstrong number"

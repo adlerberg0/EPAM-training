@@ -17,8 +17,3 @@ def cache(times: int) -> Callable:
         return wrapper
 
     return cache_dec
-
-
-@cache(times=3)
-def f():
-    return input("? ")  # careful with input() in python2, use raw_input() instead

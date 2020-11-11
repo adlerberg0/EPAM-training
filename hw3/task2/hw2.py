@@ -22,16 +22,17 @@ import random
 import struct
 from multiprocessing import Pool
 from time import perf_counter, sleep
+from typing import Any, Callable, Sequence
 
 
-def slow_calculate(value):
+def slow_calculate(value: Any):
     """Some weird voodoo magic calculations"""
     sleep(random.randint(1, 3))
     data = hashlib.md5(str(value).encode()).digest()
     return sum(struct.unpack("<" + "B" * len(data), data))
 
 
-def call_func(data, func=slow_calculate):
+def call_func(data: Sequence[Any], func: Callable = slow_calculate) -> Sequence[Any]:
     p = Pool(25)
     return p.map(func, data)
 
