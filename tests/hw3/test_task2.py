@@ -12,4 +12,5 @@ def test_multithreading(func: Callable, time_setpoint: int):
         t1 = perf_counter()
         call_func(list(range(0, 501)))
         t2 = perf_counter()
+
         assert t2 - t1 < time_setpoint

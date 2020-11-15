@@ -2,17 +2,21 @@ from typing import Any, Callable, Sequence
 
 
 def cache(times: int) -> Callable:
-    # use memoization technique
     def cache_dec(func: Callable):
-        memoization = {}
+        times_remains = 0
+        res = None
 
         def wrapper(*args: Sequence[Any]) -> Any:
-            if args in memoization and memoization[args][1] > 0:
-                memoization[args][1] -= 1
-                return memoization[args][0]
+            nonlocal times_remains, res
+            if times_remains > 0:
+                times_remains -= 1
+
+                return res
             else:
-                memoization[args] = [func(*args), times]
-                return memoization[args][0]
+                res = func(*args)
+                times_remains = times
+
+                return res
 
         return wrapper
 

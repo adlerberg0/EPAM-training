@@ -23,8 +23,12 @@ def test_cache(monkeypatch, capsys, func: Callable, times: int, repeat_pls: int)
             res = decorated()
             # resume capture after question have been asked
             captured = capsys.readouterr()
-            assert captured.out == "? " and res == test_str
+
+            assert captured.out == "? "
+            assert res == test_str
         else:
             res = decorated()
             captured = capsys.readouterr()
-            assert captured.out == "" and res == test_str
+
+            assert captured.out == ""
+            assert res == test_str

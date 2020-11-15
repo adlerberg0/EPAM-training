@@ -16,7 +16,12 @@ sample_data = [
         "type": "the Cat",
         "preferences": "he no like vegetals",
     },
-    {"is_dead": True, "kind": "parrot", "type": "bird", "name": "polly"},
+    {
+        "is_dead": True,
+        "kind": "parrot",
+        "name": "polly",
+        "type": "bird",
+    },
 ]
 
 
@@ -29,5 +34,7 @@ sample_data = [
         ({"name": "polly", "type": "bird"}, sample_data, [sample_data[2]]),
     ],
 )
-def test_cache(params: Dict[Any, Any], data: List[Any], expected_result: List[Any]):
-    assert expected_result == make_filter(**params).apply(data)
+def test_make_filter(
+    params: Dict[Any, Any], data: List[Any], expected_result: List[Any]
+):
+    assert make_filter(**params).apply(data) == expected_result

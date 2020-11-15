@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 # I decided to write a code that generates data filtering object from a list of keyword parameters:
 
 
@@ -15,11 +17,11 @@ class Filter:
 
 
 # example of usage:
-# positive_even = Filter(lambda a: a % 2 == 0, lambda a: a > 0, lambda a: isinstance(int, a)))
+# positive_even = Filter(lambda a: a % 2 == 0, lambda a: a > 0, lambda a: isinstance(int, a))
 # positive_even.apply(range(100)) should return only even numbers from 0 to 99
 
 
-def make_filter(**keywords):
+def make_filter(**keywords: Dict[Any, Any]):
     """
     Generate filter object for specified keywords
     """

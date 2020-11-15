@@ -33,8 +33,8 @@ def slow_calculate(value: Any):
 
 
 def call_func(data: Sequence[Any], func: Callable = slow_calculate) -> Sequence[Any]:
-    p = Pool(25)
-    return p.map(func, data)
+    with Pool(25) as p:
+        return p.map(func, data)
 
 
 if __name__ == "__main__":
