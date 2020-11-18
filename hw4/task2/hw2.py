@@ -33,9 +33,10 @@ def count_dots_on_i(url: str) -> int:
     try:
         response = urllib.request.urlopen(url)
         html = response.read()
-        for char in html:
-            if char == "i":
-                cnt += 1
     except:  # NOQA
         raise ValueError(f"Unreachable {url}")
+    for char in html:
+        if char == ord("i"):
+            cnt += 1
+
     return cnt

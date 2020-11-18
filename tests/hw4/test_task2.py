@@ -9,9 +9,9 @@ from hw4.task2.hw2 import count_dots_on_i
 @pytest.mark.parametrize(
     "html_page, expected_result",
     [
-        ("<p>Hello world!<p>", 0),
-        ("<p> i i i<p>", 3),
-        ("<p> raise exception <p>", "Exception"),
+        (b"<p>Hello world!<p>", 0),
+        (b"<p> i i i<p>", 3),
+        (b"<p> raise exception <p>", "Exception"),
     ],
 )
 @patch("urllib.request.urlopen")

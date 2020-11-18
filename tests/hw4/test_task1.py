@@ -18,8 +18,8 @@ def create_tmp_file(request):
 @pytest.mark.parametrize(
     "create_tmp_file, expected_result",
     [
-        (("text1.txt", 1), True),
-        (("text2.txt", -3), False),
+        (("text1.txt", "1"), True),
+        (("text2.txt", "-3"), False),
         (("text3.txt", "some data"), "Exception"),
     ],
     indirect=["create_tmp_file"],

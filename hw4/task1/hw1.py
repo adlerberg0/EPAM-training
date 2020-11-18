@@ -27,9 +27,11 @@ You will learn:
 
 
 def read_magic_number(path: str) -> bool:
-    with open(path, "r", errors="replace") as fi:
-        try:
-            num_list = list(map(int, fi.readline().strip().split()))
-            return 1 <= num_list[0] < 3
-        except BaseException:
-            raise ValueError
+    try:
+        fi = open(path, "r", errors="replace")
+        number = int(fi.readline())
+    except BaseException:
+        raise ValueError
+    fi.close()
+
+    return 1 <= number < 3
