@@ -24,14 +24,20 @@ You will learn:
 *** https://docs.python.org/3/tutorial/errors.html#handling-exceptions
 **** https://docs.python.org/3/tutorial/errors.html#raising-exceptions
 """
+from os import path
 
 
-def read_magic_number(path: str) -> bool:
-    try:
-        fi = open(path, "r", errors="replace")
-        number = int(fi.readline())
-    except BaseException:
+def check_path(file_path):
+    if not path.isfile(file_path):
         raise ValueError
-    fi.close()
+
+
+def read_magic_number(file_path: str) -> bool:
+    check_path(file_path)
+    with open(file_path, "r", errors="replace") as fi:
+        try:
+            number = int(fi.readline())
+        except BaseException:
+            raise ValueError
 
     return 1 <= number < 3
