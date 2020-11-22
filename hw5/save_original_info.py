@@ -17,15 +17,19 @@ print(custom_sum.__original_func)  # <function custom_sum at <some_id>>
 """
 
 
-def print_result(func):
+def save_function_params(origin_function):
     def wraps(custom_func):
-        custom_func.__name__ = func.__name__
-        custom_func.__doc__ = func.__doc__
-        custom_func.__original_func = func
+        custom_func.__name__ = origin_function.__name__
+        custom_func.__doc__ = origin_function.__doc__
+        custom_func.__original_func = origin_function
 
         return custom_func
 
-    @wraps
+    return wraps
+
+
+def print_result(func):
+    @save_function_params(func)
     def wrapper(*args, **kwargs):
         """Function-wrapper which print result of an original function"""
         result = func(*args, **kwargs)

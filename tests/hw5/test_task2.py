@@ -30,7 +30,7 @@ def test_original_function_executes_without_printing(capsys):
 @pytest.mark.parametrize(
     "params, expected_result",
     [
-        (([1, 2, 3], [3, 2, 1]), [1, 2, 3, 3, 2, 1]),
+        (([1, 2, 3], [3, 2, 1]), [1, 2, 3] + [3, 2, 1]),
         ((1, 2, 3, 4, 5), sum([1, 2, 3, 4, 5])),
     ],
 )
