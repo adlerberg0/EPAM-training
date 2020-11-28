@@ -10,7 +10,11 @@ reset_instances_counter - сбросить счетчик экземпляров
 
 
 def instances_counter(cls):
-
+    """
+    Decorator for counting instances of a class
+    Creates new __new__ method and assign it to existing class
+    Adds get_created_instances and reset_instances_counter methods to existing class
+    """
     cls.created_instances = 0
 
     def __new__(cls):
@@ -22,6 +26,9 @@ def instances_counter(cls):
         return cls.created_instances
 
     def reset_instances_counter(*args):
+        """
+        reset counter and return previous value
+        """
         val = cls.created_instances
         cls.created_instances = 0
         return val

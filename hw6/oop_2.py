@@ -45,6 +45,7 @@ from datetime import datetime, timedelta
 
 
 class DeadlineError(Exception):
+    """ Error for situation when have done hw too late"""
     pass
 
 
@@ -55,32 +56,37 @@ class Person:
 
 
 class Homework:
+
     def __init__(self, text: str, deadline: timedelta):
         self.text = text
         self.deadline = deadline
         self.created = datetime.now()
 
     def is_active(self):
+        """
+        Method for checking whether homework is expired or not
+        """
         current_data = datetime.now()
         return current_data - self.created < self.deadline
 
 
 class Student(Person):
+
     def __init__(self, first_name: str, last_name: str):
         super(Student, self).__init__(first_name, last_name)
 
     def do_homework(self, homework: Homework, solution: str):
+        """
+        Return a HomeworkResult instance if homework isn't expired
+        """
         if not homework.is_active():
             raise DeadlineError("You are late")
-        if len(solution) < 5:
-            return False
         return HomeworkResult(homework, solution, author=self, created=datetime.now())
 
 
 class HomeworkResult:
-    def __init__(
-        self, homework: Homework, solution: str, author: Student, created: datetime
-    ):
+    def __init__(self, homework: Homework, solution: str,
+                 author: Student, created: datetime):
         if not isinstance(homework, Homework):
             raise ValueError("You gave not a Homework object")
         self.homework = homework
@@ -96,19 +102,27 @@ class Teacher(Person):
         super().__init__(first_name, last_name)
 
     def check_homework(self, hw_result: HomeworkResult):
+        """
+        Add HomeworkResult instance to homework_done if solution is valid
+        """
         if len(hw_result.solution) < 5:
             return False
         type(self).homework_done[hw_result.homework].add(hw_result)
         return True
 
-    @staticmethod
-    def reset_results(homework=None):
+    @classmethod
+    def reset_results(cls, homework=None):
+        """
+        If homework is passed delete set of HomeworkResult instances from homework_done
+        If not - clear homework_done
+        """
         if homework is None:
-            Teacher.homework_done.clear()
+            cls.homework_done.clear()
         else:
-            Teacher.homework_done.pop(homework)
+            cls.homework_done.pop(homework)
 
-    def create_homework(self, text, days_limit):
+    @staticmethod
+    def create_homework(text, days_limit):
         return Homework(text, timedelta(days=days_limit))
 
 

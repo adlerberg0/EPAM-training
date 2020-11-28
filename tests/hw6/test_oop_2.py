@@ -23,9 +23,8 @@ def lazy_student_instance():
     yield instance
 
 
-def test_creating_instances(
-    teacher_instance, good_student_instance, lazy_student_instance
-):
+def test_creating_instances(teacher_instance, good_student_instance,
+                            lazy_student_instance):
     teacher = teacher_instance
     good_student = good_student_instance
     lazy_student = lazy_student_instance
@@ -46,9 +45,9 @@ def test_creating_instances(
     assert homework.is_active() is False
 
 
-def check_hw_exception(good_student_instance):
+def test_check_hw_exception(good_student_instance):
     with pytest.raises(ValueError):
-        HomeworkResult(good_student_instance, "fff", "Solution")
+        HomeworkResult(good_student_instance, "fff", "Solution", 0)
 
 
 def test_positive_hw_check(teacher_instance, good_student_instance):
@@ -88,9 +87,8 @@ def test_homework_done_structure(good_student_instance):
     oop_teacher.reset_results()
 
 
-def test_homework_reset_results(
-    teacher_instance, good_student_instance, lazy_student_instance
-):
+def test_homework_reset_results_method(teacher_instance, good_student_instance,
+                                lazy_student_instance):
     oop_teacher = Teacher("Daniil", "Shadrin")
     oop_hw = oop_teacher.create_homework("Learn OOP", 1)
     docs_hw = oop_teacher.create_homework("Read docs", 5)
@@ -111,4 +109,19 @@ def test_homework_reset_results(
     assert len(teacher_instance.homework_done) == 0
 
 
-# result_3 = lazy_student_instance.do_homework(docs_hw, 'done')
+def test_homework_done_does_not_contain_duplicates(good_student_instance):
+    opp_teacher = Teacher("Daniil", "Shadrin")
+    advanced_python_teacher = Teacher("Aleksandr", "Smetanin")
+
+    oop_hw = opp_teacher.create_homework("Learn OOP", 1)
+
+    result_1 = good_student_instance.do_homework(oop_hw, "I have done this hw")
+
+    opp_teacher.check_homework(result_1)
+    temp_1 = opp_teacher.homework_done
+
+    advanced_python_teacher.check_homework(result_1)
+    temp_2 = Teacher.homework_done
+    Teacher.reset_results()
+
+    assert temp_1 == temp_2
