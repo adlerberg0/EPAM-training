@@ -23,8 +23,9 @@ def lazy_student_instance():
     yield instance
 
 
-def test_creating_instances(teacher_instance, good_student_instance,
-                            lazy_student_instance):
+def test_creating_instances(
+    teacher_instance, good_student_instance, lazy_student_instance
+):
     teacher = teacher_instance
     good_student = good_student_instance
     lazy_student = lazy_student_instance
@@ -87,8 +88,9 @@ def test_homework_done_structure(good_student_instance):
     oop_teacher.reset_results()
 
 
-def test_homework_reset_results_method(teacher_instance, good_student_instance,
-                                lazy_student_instance):
+def test_homework_reset_results_method(
+    teacher_instance, good_student_instance, lazy_student_instance
+):
     oop_teacher = Teacher("Daniil", "Shadrin")
     oop_hw = oop_teacher.create_homework("Learn OOP", 1)
     docs_hw = oop_teacher.create_homework("Read docs", 5)

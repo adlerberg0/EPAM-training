@@ -1,4 +1,5 @@
 import pytest
+
 from hw6.counter import instances_counter
 
 
@@ -7,6 +8,7 @@ def user_class():
     @instances_counter
     class User:
         pass
+
     yield User
 
 

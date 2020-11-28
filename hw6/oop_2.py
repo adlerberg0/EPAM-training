@@ -46,6 +46,7 @@ from datetime import datetime, timedelta
 
 class DeadlineError(Exception):
     """ Error for situation when have done hw too late"""
+
     pass
 
 
@@ -56,7 +57,6 @@ class Person:
 
 
 class Homework:
-
     def __init__(self, text: str, deadline: timedelta):
         self.text = text
         self.deadline = deadline
@@ -71,7 +71,6 @@ class Homework:
 
 
 class Student(Person):
-
     def __init__(self, first_name: str, last_name: str):
         super(Student, self).__init__(first_name, last_name)
 
@@ -85,8 +84,9 @@ class Student(Person):
 
 
 class HomeworkResult:
-    def __init__(self, homework: Homework, solution: str,
-                 author: Student, created: datetime):
+    def __init__(
+        self, homework: Homework, solution: str, author: Student, created: datetime
+    ):
         if not isinstance(homework, Homework):
             raise ValueError("You gave not a Homework object")
         self.homework = homework
