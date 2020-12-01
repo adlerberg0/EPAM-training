@@ -1,3 +1,4 @@
+import pathlib
 from typing import Any, Sequence
 
 import pytest
@@ -21,9 +22,10 @@ tmp_set1 = {
     "Machtbewußtsein,",
 }
 tmp_list2 = ["»", "«", "—", ",", ".", "-", "?", ";", ":", "›", "‹", "'", "’", "(", ")"]
+path_to_file = pathlib.Path(".").joinpath("tests", "hw2", "data.txt")
 
 
-@pytest.mark.parametrize("value", [r".\tests\hw2\data.txt"])
+@pytest.mark.parametrize("value", [path_to_file])
 @pytest.mark.parametrize("expected_result", [14])
 def test_task1_func1(value: str, expected_result: int):
     actual_result1 = get_longest_diverse_words(value)
@@ -34,7 +36,7 @@ def test_task1_func1(value: str, expected_result: int):
     assert tmp_len == expected_result
 
 
-@pytest.mark.parametrize("value", [r".\tests\hw2\data.txt"])
+@pytest.mark.parametrize("value", [path_to_file])
 @pytest.mark.parametrize("expected_result", ["›"])
 def test_get_rarest_char(value: str, expected_result: str):
     actual_result2 = get_rarest_char(value)
@@ -42,7 +44,7 @@ def test_get_rarest_char(value: str, expected_result: str):
     assert actual_result2 == expected_result
 
 
-@pytest.mark.parametrize("value", [r".\tests\hw2\data.txt"])
+@pytest.mark.parametrize("value", [path_to_file])
 @pytest.mark.parametrize("expected_result", [tmp_list2])
 def test_count_punctuation_chars(value: str, expected_result: Sequence[Any]):
     actual_result = count_punctuation_chars(value)
@@ -50,7 +52,7 @@ def test_count_punctuation_chars(value: str, expected_result: Sequence[Any]):
     assert actual_result == expected_result
 
 
-@pytest.mark.parametrize("value", [r".\tests\hw2\data.txt"])
+@pytest.mark.parametrize("value", [path_to_file])
 @pytest.mark.parametrize("expected_result", [2972])
 def test_count_non_ascii_chars(value: str, expected_result: int):
     actual_result = count_non_ascii_chars(value)
@@ -58,7 +60,7 @@ def test_count_non_ascii_chars(value: str, expected_result: int):
     assert actual_result == expected_result
 
 
-@pytest.mark.parametrize("value", [r".\tests\hw2\data.txt"])
+@pytest.mark.parametrize("value", [path_to_file])
 @pytest.mark.parametrize("expected_result", ["ä"])
 def test_get_most_common_non_ascii_char(value: str, expected_result: str):
     actual_result5 = get_most_common_non_ascii_char(value)

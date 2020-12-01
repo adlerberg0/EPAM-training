@@ -40,6 +40,8 @@ PEP8 соблюдать строго.
 К названием остальных переменных, классов и тд. подходить ответственно -
 давать логичные подходящие имена.
 """
+from __future__ import annotations
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -51,7 +53,7 @@ class DeadlineError(Exception):
 
 
 class Person:
-    def __init__(self, first_name, last_name):
+    def __init__(self, first_name: str, last_name: str):
         self.first_name = first_name
         self.last_name = last_name
 
@@ -62,7 +64,7 @@ class Homework:
         self.deadline = deadline
         self.created = datetime.now()
 
-    def is_active(self):
+    def is_active(self) -> bool:
         """
         Method for checking whether homework is expired or not
         """
@@ -74,7 +76,7 @@ class Student(Person):
     def __init__(self, first_name: str, last_name: str):
         super(Student, self).__init__(first_name, last_name)
 
-    def do_homework(self, homework: Homework, solution: str):
+    def do_homework(self, homework: Homework, solution: str) -> HomeworkResult:
         """
         Return a HomeworkResult instance if homework isn't expired
         """
@@ -96,22 +98,22 @@ class HomeworkResult:
 
 
 class Teacher(Person):
-    homework_done = defaultdict(set)  # what to do there?
+    homework_done = defaultdict(set)
 
     def __init__(self, first_name: str, last_name: str):
         super().__init__(first_name, last_name)
 
-    def check_homework(self, hw_result: HomeworkResult):
+    def check_homework(self, hw_result: HomeworkResult) -> bool:
         """
         Add HomeworkResult instance to homework_done if solution is valid
         """
         if len(hw_result.solution) < 5:
             return False
-        type(self).homework_done[hw_result.homework].add(hw_result)
+        self.__class__.homework_done[hw_result.homework].add(hw_result)
         return True
 
     @classmethod
-    def reset_results(cls, homework=None):
+    def reset_results(cls, homework: Homework = None) -> None:
         """
         If homework is passed delete set of HomeworkResult instances from homework_done
         If not - clear homework_done
@@ -122,36 +124,5 @@ class Teacher(Person):
             cls.homework_done.pop(homework)
 
     @staticmethod
-    def create_homework(text, days_limit):
+    def create_homework(text: str, days_limit: int) -> Homework:
         return Homework(text, timedelta(days=days_limit))
-
-
-if __name__ == "__main__":
-    opp_teacher = Teacher("Daniil", "Shadrin")
-    advanced_python_teacher = Teacher("Aleksandr", "Smetanin")
-
-    lazy_student = Student("Roman", "Petrov")
-    good_student = Student("Lev", "Sokolov")
-
-    oop_hw = opp_teacher.create_homework("Learn OOP", 1)
-    docs_hw = opp_teacher.create_homework("Read docs", 5)
-
-    result_1 = good_student.do_homework(oop_hw, "I have done this hw")
-    result_2 = good_student.do_homework(docs_hw, "I have done this hw too")
-    result_3 = lazy_student.do_homework(docs_hw, "done")
-    try:
-        result_4 = HomeworkResult(good_student, "fff", "Solution")
-    except Exception:
-        print("There was an exception here")
-    opp_teacher.check_homework(result_1)
-    temp_1 = opp_teacher.homework_done
-
-    advanced_python_teacher.check_homework(result_1)
-    temp_2 = Teacher.homework_done
-    assert temp_1 == temp_2
-
-    opp_teacher.check_homework(result_2)
-    opp_teacher.check_homework(result_3)
-
-    print(Teacher.homework_done[oop_hw])
-    Teacher.reset_results()
