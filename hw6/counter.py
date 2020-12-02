@@ -17,9 +17,9 @@ def instances_counter(cls):
     """
     cls._created_instances = 0
 
-    def __new__(cls):
-        obj = super(cls, cls).__new__(cls)
-        cls._created_instances += 1
+    def __new__(Cls):
+        obj = super(cls, Cls).__new__(Cls)
+        Cls._created_instances += 1
         return obj
 
     def get_created_instances(*args):
@@ -38,3 +38,16 @@ def instances_counter(cls):
     cls.reset_instances_counter = reset_instances_counter
     """Some code"""
     return cls
+
+
+@instances_counter
+class User:
+    pass
+
+
+class Abuser(User):
+    ...
+
+
+a, _ = Abuser(), Abuser()
+print(User.get_created_instances())

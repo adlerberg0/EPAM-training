@@ -28,10 +28,10 @@ def test_decorator_is_counting_instances(user_class):
 def test_class_and_instance_get_the_same_result(user_class):
 
     user, _, _ = user_class(), user_class(), user_class()
-    get_instance_count_from_instance = user.get_created_instances()
-    get_instance_count_from_class = user_class.get_created_instances()
+    instance_count_from_instance = user.get_created_instances()
+    instance_count_from_class = user_class.get_created_instances()
 
-    assert get_instance_count_from_class == get_instance_count_from_instance
+    assert instance_count_from_class == instance_count_from_instance
 
 
 def test_reset_instance_count(user_class):
