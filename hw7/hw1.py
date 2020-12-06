@@ -16,8 +16,6 @@ def tree_traverse(tree: Any, element: Any) -> int:
     if isinstance(tree, dict):
         # recursive dict object
         for key, value in tree.items():
-            if key == element:
-                cnt += 1
             if value == element:  # do not pass value to recursion
                 cnt += 1
             else:
