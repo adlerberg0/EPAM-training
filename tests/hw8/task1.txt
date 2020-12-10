@@ -1,0 +1,9 @@
+name=Shale
+last_name=Cadash
+Spec=Pulverizing Blows
+Strength=21
+Dexterity=11
+Willpower=15
+Magic=10
+Cunning=14
+Constitution=15
