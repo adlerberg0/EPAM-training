@@ -62,7 +62,6 @@ class TableData:
     def __init__(self, db_path: str):
         self.db_path = db_path
 
-    @staticmethod
     def db_connection(func):
         def wrapper(self, *args, **kwargs):
             with connect(self.db_path) as db_connection:
@@ -72,19 +71,19 @@ class TableData:
 
         return wrapper
 
-    @db_connection.__func__
+    @db_connection
     def __getitem__(self, item: str, db_cursor: Cursor = None) -> tuple:
         db_cursor.execute(f'SELECT * from Presidents where name=="{item}"')
 
         return db_cursor.fetchone()
 
-    @db_connection.__func__
+    @db_connection
     def __setitem__(self, key: str, value: Any, db_cursor: Cursor = None) -> tuple:
         db_cursor.execute(f"REPLACE into Presidents VALUES{value}")
 
         return db_cursor.fetchone()
 
-    @db_connection.__func__
+    @db_connection
     def __iter__(self, db_cursor: Cursor = None) -> Iterable:
         db_cursor.execute("SELECT * from Presidents")
         self.db_dict = {}
@@ -93,11 +92,11 @@ class TableData:
 
         return IterableTableData(self.db_dict.copy())
 
-    @db_connection.__func__
+    @db_connection
     def __len__(self, db_cursor: Cursor = None) -> int:
         db_cursor.execute("SELECT count(*) from Presidents")
 
-        return db_cursor.fetchone()
+        return db_cursor.fetchone()[0]
 
 
 class IterableTableData:
