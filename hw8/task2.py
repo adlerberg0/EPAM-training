@@ -45,7 +45,7 @@ object implements iteration protocol. i.e. you could use it in for loops::
     for president in presidents:
         print(president['name'])
 all above mentioned calls should reflect most recent data.
-If data in table changed after you created collection instance, your calls should return updated data.
+If data in table changed after you created collection self.instance, your calls should return updated data.
 
 Avoid reading entire table into memory.
 When iterating through records, start reading the first record, then go to the next one,
@@ -59,9 +59,11 @@ from typing import Any, Iterable
 
 
 class TableData:
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, table_name: str):
         self.db_path = db_path
+        self.table_name = table_name
 
+    @staticmethod
     def db_connection(func):
         def wrapper(self, *args, **kwargs):
             with connect(self.db_path) as db_connection:
@@ -71,49 +73,30 @@ class TableData:
 
         return wrapper
 
-    @db_connection
+    @db_connection.__func__
     def __getitem__(self, item: str, db_cursor: Cursor = None) -> tuple:
-        db_cursor.execute(f'SELECT * from Presidents where name=="{item}"')
+        db_cursor.execute(f"SELECT * from {self.table_name} where name==(?)", (item,))
+        res = db_cursor.fetchone()
+        if res is None:
+            raise KeyError
+        return res
 
-        return db_cursor.fetchone()
+    @db_connection.__func__
+    def __setitem__(self, key: str, value: Any, db_cursor: Cursor = None) -> None:
+        db_cursor.execute(f"REPLACE into {self.table_name} VALUES (?, ?, ?)", value)
 
-    @db_connection
-    def __setitem__(self, key: str, value: Any, db_cursor: Cursor = None) -> tuple:
-        db_cursor.execute(f"REPLACE into Presidents VALUES{value}")
-
-        return db_cursor.fetchone()
-
-    @db_connection
     def __iter__(self, db_cursor: Cursor = None) -> Iterable:
-        db_cursor.execute("SELECT * from Presidents")
-        self.db_dict = {}
+        return self.__next__()
+
+    @db_connection.__func__
+    def __next__(self, db_cursor: Cursor = None) -> tuple:
+        db_cursor.execute(f"SELECT * from {self.table_name}")
+
         while row := db_cursor.fetchone():
-            self.db_dict[row[0]] = row
+            yield row[0], row
 
-        return IterableTableData(self.db_dict.copy())
-
-    @db_connection
+    @db_connection.__func__
     def __len__(self, db_cursor: Cursor = None) -> int:
-        db_cursor.execute("SELECT count(*) from Presidents")
+        db_cursor.execute(f"SELECT count(*) from {self.table_name}")
 
         return db_cursor.fetchone()[0]
-
-
-class IterableTableData:
-    def __init__(self, db_dict):
-        self.db_dict = db_dict
-        self.keys, self.values = zip(*db_dict.items())
-        self.index = 0
-        self.len = len(db_dict)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.index < self.len:
-            key, value = self.keys[self.index], self.values[self.index]
-            self.index += 1
-
-            return key, value
-        else:
-            raise StopIteration

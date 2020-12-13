@@ -3,71 +3,70 @@ import pytest
 from hw8.task1 import KeyValueStorage
 
 
-@pytest.fixture(scope="module")
-def key_value_storage_instance():
-    instance = KeyValueStorage("task1.txt")
-    storage = instance._get_copy_of_storage_dict()
-    yield instance
-    for key, value in storage.items():
-        instance[key] = value
+class TestClass:
+    @classmethod
+    def setup_class(cls):
+        cls.instance = KeyValueStorage("task1.txt")
+        cls.storage = cls.instance._file_content.copy()
 
+    @classmethod
+    def teardown_class(cls):
+        open("task1.txt", "w").close()
+        for key, value in cls.storage.items():
+            cls.instance[key] = value
 
-def test_reading_char_and_integer_value_from_file(key_value_storage_instance):
-    instance = key_value_storage_instance
+    def test_reading_char_and_integer_value_from_file(self):
 
-    assert instance["name"] == "Shale"
-    assert instance["Strength"] == 18
+        assert self.__class__.instance["name"] == "Shale"
+        assert self.__class__.instance["Strength"] == 18
 
+    def test_assigning_char_and_int_value_to_storage(self):
 
-def test_assigning_char_and_int_value_to_storage(key_value_storage_instance):
-    instance = key_value_storage_instance
+        self.__class__.instance.Spec = "Pulverizing Blows"
+        self.__class__.instance.Strength = 21
 
-    instance.Spec = "Pulverizing Blows"
-    instance.Strength = 21
+        assert self.__class__.instance.Spec == "Pulverizing Blows"
+        assert self.__class__.instance.Strength == 21
 
-    assert instance.Spec == "Pulverizing Blows"
-    assert instance.Strength == 21
+    def test_assigning_char_and_int_value_to_storage_via_square_bracket(self):
 
+        self.__class__.instance["Spec"] = "Rock Mastery"
+        self.__class__.instance["Constitution"] = 15
 
-def test_assigning_char_and_int_value_to_storage_via_square_bracket(
-    key_value_storage_instance,
-):
-    instance = key_value_storage_instance
+        assert self.__class__.instance["Spec"] == "Rock Mastery"
+        assert self.__class__.instance["Constitution"] == 15
 
-    instance["Spec"] = "Rock Mastery"
-    instance["Constitution"] = 15
+    def test_assigning_wrong_value_to_storage(self):
 
-    assert instance["Spec"] == "Rock Mastery"
-    assert instance["Constitution"] == 15
+        with pytest.raises(ValueError):
+            self.__class__.instance["Constitution"] = 18.1
+        with pytest.raises(ValueError):
+            self.__class__.instance["last_name"] = ("A",)
+        with pytest.raises(ValueError):
+            self.__class__.instance.Constitution = 18.1
+        with pytest.raises(ValueError):
+            self.__class__.instance.last_name = ("A",)
+        with pytest.raises(KeyError):
+            self.__class__.instance["hates_pigeons"]
 
+    def test_assigning_unexisting_key_or_attribute(self):
 
-def test_assigning_wrong_value_to_storage(key_value_storage_instance):
-    instance = key_value_storage_instance
-
-    with pytest.raises(ValueError):
-        instance["Constitution"] = "18"
-    with pytest.raises(ValueError):
-        instance["last_name"] = 0
-    with pytest.raises(AttributeError):
-        instance[
-            "unexisting_attribute_with_quotes"
-        ] = "I wonder what it is like to float...or drown."
-
-
-def test_assigning_wrong_value_or_attribute_to_storage(key_value_storage_instance):
-    instance = key_value_storage_instance
-
-    with pytest.raises(ValueError):
-        instance.Constitution = "18"
-    with pytest.raises(ValueError):
-        instance.last_name = 0
-
-    with pytest.raises(ValueError):
-        instance["Constitution"] = "18"
-    with pytest.raises(ValueError):
-        instance["last_name"] = 0
-
-    with pytest.raises(AttributeError):
-        instance.unexisting_attribute_with_quotes = (
+        self.__class__.instance.unexisting_attribute_with_quote1 = (
             "I wonder what it is like to float...or drown."
         )
+        self.__class__.instance["unexisting_attribute_with_quote2"] = "Oooh, Shiny!"
+
+        assert (
+            self.__class__.instance.unexisting_attribute_with_quote1
+            == "I wonder what it is like to float...or drown."
+        )
+        assert (
+            self.__class__.instance.unexisting_attribute_with_quote2 == "Oooh, Shiny!"
+        )
+
+    def test_delete_value_from_the_storage(self):
+
+        del self.__class__.instance["Willpower"]
+
+        with pytest.raises(KeyError):
+            self.__class__.instance["Willpower"]

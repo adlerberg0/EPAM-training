@@ -21,129 +21,108 @@ In case when value cannot be assigned to an attribute (for example when there's 
  File size is expected to be small, you are permitted to read it entirely into memory.
 """
 from os import path
-from typing import Any
-
-
-def change_or_delete_line_from_file(
-    filepath: str, key: str, value: Any, delete: bool = False
-):
-    if not path.isfile(filepath):
-        raise ValueError
-
-    result_file_str = ""
-    with open(filepath, mode="r") as f:
-        for line in f:
-            file_key, old_value = line.strip().split("=")
-            if file_key == key:
-                if delete:
-                    continue
-                result_file_str += f"{file_key}={value}\n"
-            else:
-                result_file_str += f"{file_key}={old_value}\n"
-    with open(filepath, mode="w") as f:
-        f.write(result_file_str)
+from typing import Union
 
 
 class KeyValueStorage:
     def __init__(self, file_path: str):
-        super().__setattr__(
-            "_file_path", file_path
-        )  # or self.__dict__["_file_path"] = file_path
+        super().__setattr__("_file_path", file_path)
+
         if not path.isfile(file_path):
-            raise ValueError
+            raise FileNotFoundError
         with open(file_path) as f:
             # use specified dict to prevent rewriting collisions of class attributes from __dict__
-            super().__setattr__("_file_storage", {})
+            super().__setattr__("_file_content", {})
             for line in f:
                 key, value = line.strip().split("=")
                 if value.isdigit():
                     value = int(value)
-                super().__getattribute__("_file_storage")[key] = value
+                self._file_content[key] = value
 
-    def __getattribute__(self, item: str):
+    def __getattr__(self, item: str) -> Union[int, str]:
         """
         Get attribute value through . notation
         """
-        # try access to inner attributes and methods through . notation
         try:
-            inner_data = super().__getattribute__(item)
-        except AttributeError:
-            ...  # do nothing
-        else:
-            return inner_data
-        # or obtain item from file storage
-        return super().__getattribute__("_file_storage").get(item)
+            res = self._file_content[item]
+        except KeyError:
+            raise AttributeError
+        return res
 
-    def __getitem__(self, item: str) -> Any:
+    def __getitem__(self, item: str) -> Union[int, str]:
         """
         Get attribute value via square brackets
         """
-        try:
-            res = super().__getattribute__("_file_storage").get(item)
-        except AttributeError:
-            self.__missing__(item)
-        return res
+        if item in self.__dict__:
+            return self.item
 
-    def __setattr__(self, name: str, value: Any):
+        return self._file_content[item]
+
+    def __setattr__(self, name: str, value: Union[int, str]) -> None:
         """
         Set attribute value through . notation
         """
-        # a name presence and a value type check
-        file_path = super().__getattribute__("_file_path")
-        file_storage = super().__getattribute__("_file_storage")
-        if name not in file_storage:
-            raise AttributeError
-        if not isinstance(value, type(file_storage[name])):
+        if name in self.__dict__:
+            super().__setattr__(name, value)
+            return
+        # a value type check
+        if not isinstance(value, (int, str)):
             raise ValueError
 
-        change_or_delete_line_from_file(file_path, name, value)
+        file_path = self._file_path
+        file_storage = self._file_content
+
+        self.change_or_delete_line_from_file(file_path, name, value)
         file_storage[name] = value
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Union[int, str]) -> None:
         """
         Set attribute value via square brackets
         """
-        # a name presence and a value type check
-        file_path = super().__getattribute__("_file_path")
-        file_storage = super().__getattribute__("_file_storage")
-        if key not in file_storage:
-            raise AttributeError
-        if not isinstance(value, type(file_storage[key])):
+        # a value type check
+        if not isinstance(value, (int, str)):
             raise ValueError
 
-        change_or_delete_line_from_file(file_path, key, value)
+        file_path = self._file_path
+        file_storage = self._file_content
+
+        self.change_or_delete_line_from_file(file_path, key, value)
         file_storage[key] = value
 
-    def __delitem__(self, key: str):
+    def __delitem__(self, key: str) -> None:
         """
         Delete item from _file_storage and file
         """
-        file_path = super().__getattribute__("_file_path")
-        file_storage = super().__getattribute__("_file_storage")
+        file_path = self._file_path
+        file_storage = self._file_content
         if key not in file_storage:
-            raise AttributeError
+            raise KeyError
 
-        change_or_delete_line_from_file(file_path, key, None, delete=True)
+        self.change_or_delete_line_from_file(file_path, key, None, delete=True)
         file_storage.pop(key)
 
-    def __getattr__(self, item: str):
-        """
-        Is called by __getattribute__ when AttributeError is risen
-        """
-        raise AttributeError
+    @staticmethod
+    def change_or_delete_line_from_file(
+        filepath: str, key: str, value: Union[int, str], delete: bool = False
+    ) -> None:
+        if not path.isfile(filepath):
+            raise FileNotFoundError
 
-    def __missing__(self, key: str):
-        """
-        Is called by __getitem__ when AttributeError is risen
-        """
-        print(f"There is no {key}")
-        raise AttributeError
+        result_file_str = ""
+        is_found = False
+        with open(filepath, mode="r+") as f:
+            for line in f:
+                if line != "":
+                    file_key, old_value = line.strip().split("=")
+                if file_key == key:
+                    is_found = True
+                    if delete:
+                        continue
+                    result_file_str += f"{file_key}={value}\n"
+                else:
+                    result_file_str += f"{file_key}={old_value}\n"
 
-    def _get_copy_of_storage_dict(self) -> dict:
-        """
-        Helping method for tests
-        """
-        return super().__getattribute__("_file_storage").copy()
-
-
-# why do we have recursion with self.__dict__[item]??
+            if not is_found:
+                result_file_str += f"{key}={value}\n"
+            f.seek(0, 0)
+            f.write(result_file_str)
