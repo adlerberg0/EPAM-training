@@ -45,7 +45,7 @@ object implements iteration protocol. i.e. you could use it in for loops::
     for president in presidents:
         print(president['name'])
 all above mentioned calls should reflect most recent data.
-If data in table changed after you created collection self.instance, your calls should return updated data.
+If data in table changed after you created collection instance, your calls should return updated data.
 
 Avoid reading entire table into memory.
 When iterating through records, start reading the first record, then go to the next one,
