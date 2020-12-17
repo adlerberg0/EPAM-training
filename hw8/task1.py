@@ -69,11 +69,8 @@ class KeyValueStorage:
         if not isinstance(value, (int, str)):
             raise ValueError
 
-        file_path = self._file_path
-        file_storage = self._file_content
-
-        self.change_or_delete_line_from_file(file_path, name, value)
-        file_storage[name] = value
+        self.change_or_delete_line_from_file(self._file_path, name, value)
+        self._file_content[name] = value
 
     def __setitem__(self, key: str, value: Union[int, str]) -> None:
         """
@@ -83,27 +80,25 @@ class KeyValueStorage:
         if not isinstance(value, (int, str)):
             raise ValueError
 
-        file_path = self._file_path
-        file_storage = self._file_content
-
-        self.change_or_delete_line_from_file(file_path, key, value)
-        file_storage[key] = value
+        self.change_or_delete_line_from_file(self._file_path, key, value)
+        self._file_content[key] = value
 
     def __delitem__(self, key: str) -> None:
         """
         Delete item from _file_storage and file
         """
-        file_path = self._file_path
-        file_storage = self._file_content
-        if key not in file_storage:
+        if key not in self._file_content:
             raise KeyError
 
-        self.change_or_delete_line_from_file(file_path, key, None, delete=True)
-        file_storage.pop(key)
+        self.change_or_delete_line_from_file(self._file_path, key, None, delete=True)
+        self._file_content.pop(key)
 
     @staticmethod
     def change_or_delete_line_from_file(
-        filepath: str, key: str, value: Union[int, str], delete: bool = False
+        filepath: str,
+        key: str,
+        value: Union[int, str, None] = None,
+        delete: bool = False,
     ) -> None:
         if not path.isfile(filepath):
             raise FileNotFoundError
@@ -112,8 +107,9 @@ class KeyValueStorage:
         is_found = False
         with open(filepath, mode="r+") as f:
             for line in f:
-                if line != "":
-                    file_key, old_value = line.strip().split("=")
+                if line == "":
+                    continue
+                file_key, old_value = line.strip().split("=")
                 if file_key == key:
                     is_found = True
                     if delete:
@@ -122,7 +118,7 @@ class KeyValueStorage:
                 else:
                     result_file_str += f"{file_key}={old_value}\n"
 
-            if not is_found:
+            if not is_found and not delete:
                 result_file_str += f"{key}={value}\n"
             f.seek(0, 0)
             f.write(result_file_str)

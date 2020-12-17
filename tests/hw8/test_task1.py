@@ -1,17 +1,21 @@
+import pathlib
+
 import pytest
 
 from hw8.task1 import KeyValueStorage
+
+path_to_file = pathlib.Path.cwd().joinpath("tests", "hw8", "task1.txt")
 
 
 class TestClass:
     @classmethod
     def setup_class(cls):
-        cls.instance = KeyValueStorage("task1.txt")
+        cls.instance = KeyValueStorage(path_to_file)
         cls.storage = cls.instance._file_content.copy()
 
     @classmethod
     def teardown_class(cls):
-        open("task1.txt", "w").close()
+        open(path_to_file, "w").close()
         for key, value in cls.storage.items():
             cls.instance[key] = value
 

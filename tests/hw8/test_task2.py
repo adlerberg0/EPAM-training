@@ -1,12 +1,16 @@
+import pathlib
+
 import pytest
 
 from hw8.task2 import TableData
+
+path_to_db = pathlib.Path.cwd().joinpath("tests", "hw8", "example.sqlite")
 
 
 class TestClass:
     @classmethod
     def setup(cls):
-        cls.instance = TableData("example.sqlite", "Presidents")
+        cls.instance = TableData(path_to_db, "Presidents")
 
     def test_retrieving_params(self):
 
