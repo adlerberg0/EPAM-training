@@ -6,10 +6,7 @@ Do it both ways: as a class and as a generator.
 """
 from contextlib import contextmanager
 from types import TracebackType
-from typing import Optional, Type  # NOQA
-
-# how to fix this?
-# hw9/task2.py:9:1: TYP001 guard import by `if False:  # TYPE_CHECKING`: Type (not in 3.5.0, 3.5.1)
+from typing import Optional, Type  # noqa
 
 
 class SupressorClass:
