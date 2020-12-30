@@ -6,12 +6,14 @@ import pandas as pd
 from aiohttp import web
 from bs4 import BeautifulSoup
 
-from hw10.stonks import CompanyInfo  # noqa
-from hw10.stonks import get_dollar_course_value  # noqa;
-from hw10.stonks import parse_company_page_info  # noqa;
-from hw10.stonks import parse_information_from_one_page  # noqa;
-from hw10.stonks import retrieve_main_page_company_info  # noqa;
-from hw10.stonks import write_result_to_json  # noqa
+from hw10.stonks import (
+    CompanyInfo,
+    append_data_to_company_list_and_create_new_tasks,
+    get_dollar_course_value,
+    parse_company_page_info,
+    write_essential_company_info_to_object,
+    write_result_to_json,
+)
 
 verified_company_list = [
     CompanyInfo(
@@ -58,7 +60,7 @@ async def test_retrieve_main_page_company_info():
         raw = fi.read()
     soup = BeautifulSoup(raw, "lxml")
     company = CompanyInfo()
-    retrieve_main_page_company_info(company, soup)
+    write_essential_company_info_to_object(company, soup)
     assert company == CompanyInfo(
         name="YUM! Brands", url="/stocks/yum-stock", year_growth=-1.33
     )
@@ -93,10 +95,12 @@ async def test_parse_company_page_info(aiohttp_raw_server: Any, aiohttp_client):
 
 async def test_get_dollar_course_value():
     with open("test_get_dollar_course_value.xml") as fi:
-        assert await get_dollar_course_value(fi.read()) == 30.9436
+        assert get_dollar_course_value(fi.read()) == 30.9436
 
 
-async def test_parse_information_from_one_page(aiohttp_raw_server, aiohttp_client):
+async def test_append_data_to_company_list_and_create_new_tasks(
+    aiohttp_raw_server, aiohttp_client
+):
     with open("test_parse_information_from_one_page.html") as fi:
         soup = BeautifulSoup(fi, "lxml")
 
@@ -112,13 +116,19 @@ async def test_parse_information_from_one_page(aiohttp_raw_server, aiohttp_clien
     dollar_course = 75.4571
     company_list = []
     task_list = []
-    await parse_information_from_one_page(
-        client, base_url, addition, company_list, task_list, dollar_course, page_param
+    await append_data_to_company_list_and_create_new_tasks(
+        client,
+        base_url,
+        addition,
+        company_list,
+        task_list,
+        dollar_course,
+        page_param,
     )
     assert company_list == verified_company_list
 
 
-def test_write_results_to_json(event_loop, tmp_path):
+def test_write_results_to_json(tmp_path):
     os.chdir(tmp_path)
     company_list = [
         CompanyInfo(
@@ -160,7 +170,7 @@ def test_write_results_to_json(event_loop, tmp_path):
     ]
 
     test_dir = Path(__file__).parent
-    event_loop.run_until_complete(write_result_to_json(company_list))
+    write_result_to_json(company_list)
     pd.testing.assert_frame_equal(
         pd.read_json("company_by_price.json", orient="records"),
         pd.read_json(test_dir / "verified_company_by_price.json", orient="records"),

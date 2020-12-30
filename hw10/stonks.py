@@ -23,7 +23,9 @@ class CompanyInfo:
     max_income: float = 0
 
 
-def retrieve_main_page_company_info(company: CompanyInfo, raw_data: bs4.Tag) -> None:
+def write_essential_company_info_to_object(
+    company: CompanyInfo, raw_data: bs4.Tag
+) -> None:
     company.url = str(raw_data.findChild("a")["href"])
     company.name = str(raw_data.findChild("a")["title"])
     company.year_growth = float(
@@ -35,7 +37,7 @@ async def parse_company_page_info(
     company: CompanyInfo,
     session: aiohttp.ClientSession,
     base_url: str,
-    dollar_course: float,
+    dollar_rate: float,
 ) -> None:
     async with session.get(base_url + company.url) as resp:
         if resp.status != 200:
@@ -44,7 +46,7 @@ async def parse_company_page_info(
         # get company price in ruble
         price_tag = soup.find("span", class_="price-section__current-value")
         if price_tag:
-            company.price = float(price_tag.string.replace(",", "")) * dollar_course
+            company.price = float(price_tag.string.replace(",", "")) * dollar_rate
         # get company code
         code_tag = soup.find("span", class_="price-section__category")
         if code_tag:
@@ -73,18 +75,18 @@ async def parse_company_page_info(
         company.max_income = (high52weeks - low52weeks) / low52weeks
 
 
-async def get_dollar_course_value(markup: str) -> float:
+def get_dollar_course_value(markup: str) -> float:
     soup = BeautifulSoup(markup, "lxml")
     return float(soup.find("valute", id="R01235").value.string.replace(",", "."))
 
 
-async def parse_information_from_one_page(
+async def append_data_to_company_list_and_create_new_tasks(
     session,
     base_url: str,
     addition: str,
     company_list: list,
     task_list: list,
-    dollar_course: float,
+    dollar_rate: float,
     page_param: dict,
 ) -> Optional[int]:
     async with session.get(base_url + addition, params=page_param) as resp:
@@ -102,15 +104,15 @@ async def parse_information_from_one_page(
         for raw in table_header.find_next_siblings():
             company = CompanyInfo()
             company_list.append(company)
-            retrieve_main_page_company_info(company, raw)
+            write_essential_company_info_to_object(company, raw)
             task_list.append(
                 asyncio.create_task(
-                    parse_company_page_info(company, session, base_url, dollar_course)
+                    parse_company_page_info(company, session, base_url, dollar_rate)
                 )
             )
 
 
-async def write_result_to_json(company_list: list) -> None:
+def write_result_to_json(company_list: list) -> None:
     field_names = [field.name for field in fields(CompanyInfo)]
     df = pd.DataFrame(company_list, columns=field_names)
     df.sort_values(by=["price"], ascending=False)[0:10].to_json(
@@ -132,7 +134,7 @@ async def main_task(base_url: str, addition: str) -> None:
         async with session.get("http://www.cbr.ru/scripts/XML_daily.asp") as resp:
             if resp.status != 200:
                 raise ConnectionError
-            dollar_course = await get_dollar_course_value(
+            dollar_course = get_dollar_course_value(
                 await resp.text(),
             )
         # we start from first page
@@ -140,7 +142,7 @@ async def main_task(base_url: str, addition: str) -> None:
         task_list = []
         company_list = []
         while True:
-            res = await parse_information_from_one_page(
+            res = await append_data_to_company_list_and_create_new_tasks(
                 session,
                 base_url,
                 addition,
@@ -155,7 +157,7 @@ async def main_task(base_url: str, addition: str) -> None:
             page_param["p"] += 1
 
         await asyncio.gather(*task_list)
-        await write_result_to_json(company_list)
+        write_result_to_json(company_list)
 
 
 if __name__ == "__main__":
