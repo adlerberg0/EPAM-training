@@ -21,6 +21,7 @@ class SizesEnum(metaclass=SimplifiedEnum):
 assert ColorsEnum.RED == "RED"
 assert SizesEnum.XL == "XL"
 """
+from typing import Iterable
 
 
 class SimplifiedEnum(type):
@@ -34,3 +35,10 @@ class SimplifiedEnum(type):
         if item not in self._dict_storage:
             raise KeyError
         return self._dict_storage[item]
+
+    def __iter__(self) -> Iterable:
+        return self.__next__()
+
+    def __next__(self) -> str:
+        for value in self._dict_storage.values():
+            yield value

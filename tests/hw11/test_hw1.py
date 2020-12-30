@@ -10,3 +10,13 @@ def test_simplified_enum_usage():
 
     assert ColorsEnum.RED == "RED"
     assert SizesEnum.XL == "XL"
+
+
+def test_traversing_through_enum():
+    colours = ("RED", "BLUE", "ORANGE", "BLACK")
+
+    class ColorsEnum(metaclass=SimplifiedEnum):
+        __keys = colours
+
+    for i, value in enumerate(ColorsEnum):
+        assert value == colours[i]

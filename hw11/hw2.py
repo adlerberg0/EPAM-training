@@ -30,7 +30,7 @@ class Order:
             raise ValueError
         self.price = price
         self.client_status = client_status
-        self.discount = discount_strategy(self)
+        self.discount_strategy = discount_strategy
 
     def final_price(self) -> float:
-        return self.price - self.price * self.discount
+        return self.price - self.price * self.discount_strategy(self)
