@@ -8,14 +8,14 @@ import aiohttp
 import requests
 
 # Create your views here.
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from .forms import DateRangeForm
 
 
-def choose_country(request, page: int = 1):
+def choose_country(request: HttpRequest, page: int = 1) -> HttpResponse:
     limit = 20
     offset = (page - 1) * limit
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/locations"
@@ -53,7 +53,7 @@ def choose_country(request, page: int = 1):
     return render(request, "forecast_app/index.html", context=context)
 
 
-def choose_city(request, country_id: str, page: int = 1):
+def choose_city(request: HttpRequest, country_id: str, page: int = 1) -> HttpResponse:
     limit = 20
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations"
 
@@ -93,7 +93,7 @@ def choose_city(request, country_id: str, page: int = 1):
     return render(request, "forecast_app/cities.html", context=context)
 
 
-def set_statistic_time_interval(request, city_id: str):
+def set_statistic_time_interval(request: HttpRequest, city_id: str) -> HttpResponse:
 
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
@@ -126,7 +126,7 @@ class StationStatisticSummary:
     avg_wind_speed: float = 0
 
 
-def get_station_statistic(request, stationid: str):
+def get_station_statistic(request: HttpRequest, stationid: str) -> HttpResponse:
     startdate = request.GET.get("startdate", "")
     enddate = request.GET.get("enddate", "")
     statistic_summary = StationStatisticSummary()
@@ -346,7 +346,7 @@ async def retrieve_and_calc_temperature_params(
     end_date: str,
     offset: str,
     limit: str,
-) -> None:
+) -> float:
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
     params = {
