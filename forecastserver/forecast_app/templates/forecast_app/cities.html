@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Available cities</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+</head>
+<body>
+{% if city_list %}
+<div class="container">
+    <div class="list-group justify-content-center">
+        {% for city in city_list %}
+            <!-- <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li> -->
+            <a  href="{% url 'forecast_app:set_statistic_time_interval' city.id %}" class="list-group-item list-group-item-action"
+                style="color:black;text-align:center;">{{city.name}}</a>
+        {% endfor %}
+    </div>
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if first_page %}disabled{% endif %}"><a class="page-link" href="{% url 'forecast_app:city' country_id page|add:'-1' %}">Go back</a></li>
+        {% if not first_page %}
+            <li class="page-item">
+                <a class="page-link" href="{% url 'forecast_app:city' country_id 1 %}">{{1}}</a>
+            </li>
+        {% endif %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'forecast_app:city' country_id page %}">{{page}}</a>
+        </li>
+        {% if page|add:'1' < last_page_num  %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'forecast_app:city' country_id page|add:'1' %}">{{page|add:'1'}}</a>
+        </li>
+        {% endif %}
+        {% if page|add:'2' < last_page_num  %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'forecast_app:city' country_id page|add:'2' %}">{{page|add:'2'}}</a>
+        </li>
+        {% endif %}
+        {% if page < last_page_num  %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'forecast_app:city' country_id last_page_num %}">{{last_page_num}}</a>
+        </li>
+        {% endif %}
+        <li class="page-item {% if last_page %}disabled{% endif %}"><a class="page-link" href="{% url 'forecast_app:city' country_id page|add:'1' %}">Go ahead</a></li>
+    </ul>
+</div>
+{% else %}
+    <p>No city are available.</p>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js" integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous"></script>
+
+</body>
+</html>
