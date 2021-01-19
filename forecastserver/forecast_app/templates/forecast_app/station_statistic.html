@@ -17,9 +17,17 @@
     <p class="text-center">{{avg_temperature}}</p>
     {% endif %}
     <h4 class="text-center">Average temperatures per years:</h4>
+    {% if avg_temperature_per_year %}
     {% for avg_temperature in avg_temperature_per_year %}
         <p class="text-center">{{avg_temperature}}</p>
-    {% endfor%}
+    {% endfor %}
+    {% endif %}
+    {% if max_temp_date_list %}
+    <h4 class="text-center">Max temperatures dates:</h4>
+    {% for dates in max_temp_date_list %}
+        <p class="text-center">Max temperature:{{dates.value}} date {{dates.date}}</p>
+    {% endfor %}
+    {% endif %}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js" integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous"></script>

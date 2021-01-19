@@ -12,5 +12,5 @@ class DateRangeForm(forms.Form):
                 label="Min date", widget=forms.SelectDateWidget(years=years)
             )
             self.fields["max_date"] = forms.DateField(
-                label="Min date", widget=forms.SelectDateWidget(years=years)
+                label="Max date", widget=forms.SelectDateWidget(years=years)
             )

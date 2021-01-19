@@ -3,6 +3,7 @@ import datetime
 import json
 import math
 from dataclasses import dataclass, field
+from typing import Tuple
 
 import aiohttp
 import requests
@@ -123,6 +124,7 @@ def set_statistic_time_interval(request: HttpRequest, city_id: str) -> HttpRespo
 class StationStatisticSummary:
     avg_temperature: float = 0
     avg_temperatures_per_year: list = field(default_factory=lambda: [])
+    max_temp_date_list: list = field(default_factory=lambda: [])
     avg_wind_speed: float = 0
 
 
@@ -146,6 +148,7 @@ def get_station_statistic(request: HttpRequest, stationid: str) -> HttpResponse:
         {
             "avg_temperature": statistic_summary.avg_temperature,
             "avg_temperature_per_year": statistic_summary.avg_temperatures_per_year,
+            "max_temp_date_list": statistic_summary.max_temp_date_list,
         },
     )
 
@@ -188,14 +191,19 @@ async def retrieve_station_statistic(
         )
 
     await asyncio.gather(*annual_statistic_tasks_list)
+    max_temp_date_list = []
     for item in annual_statistic_list:
         if item.avg_temperature is not None:
             statistic_summary.avg_temperature += item.avg_temperature
         statistic_summary.avg_temperatures_per_year.append(item.avg_temperature)
         if item.avg_wind_speed is not None:
             statistic_summary.avg_wind_speed += item.avg_wind_speed
+        if item.max_temp_date_list is not None:
+            max_temp_date_list.extend(item.max_temp_date_list)
+    max_temp_date_list.sort(key=lambda data: data["value"], reverse=True)
     statistic_summary.avg_temperature /= len(annual_statistic_list)
     statistic_summary.avg_wind_speed /= len(annual_statistic_list)
+    statistic_summary.max_temp_date_list = max_temp_date_list[:3]
 
 
 async def get_annual_statistic(
@@ -208,7 +216,10 @@ async def get_annual_statistic(
         temperature_statistic_task(station_id, start_date, end_date)
     )
     await temperature_task
-    annual_statistic_summary.avg_temperature = temperature_task.result()
+    (
+        annual_statistic_summary.avg_temperature,
+        annual_statistic_summary.max_temp_date_list,
+    ) = temperature_task.result()
 
 
 #    wind_task = asyncio.create_task(
@@ -281,7 +292,7 @@ async def wind_statistic_task(
 
 async def temperature_statistic_task(
     station_id: str, start_date: datetime.date, end_date: datetime.date
-) -> float:
+) -> Tuple[float, list]:
 
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
@@ -307,9 +318,11 @@ async def temperature_statistic_task(
                 r_json = await resp.json()
                 result_set = r_json["metadata"]["resultset"]
             except json.decoder.JSONDecodeError:
-                return None  # TO DO: what to do here?
+                print("KEY ERROR")
+                return None, None  # TO DO: what to do here?
             except KeyError:
-                return None  # TO DO: what to do here?
+                print("JSON ERROR")
+                return None, None  # TO DO: what to do here?
 
         limit = 1000
         last_page_num = math.ceil(result_set["count"] / limit)
@@ -331,11 +344,16 @@ async def temperature_statistic_task(
                 )
             )
         await asyncio.gather(*retrieve_and_calc_temperature_task_list)
+
         avg_value = 0
+        max_temp_raw_list = []
         for task in retrieve_and_calc_temperature_task_list:
-            avg_value += task.result()
+            temperature, max_temp_raw = task.result()
+            avg_value += temperature
+            max_temp_raw_list.extend(max_temp_raw)
         avg_value /= last_page_num
-        return avg_value
+        max_temp_raw_list.sort(key=lambda data: data["value"], reverse=True)
+        return avg_value, max_temp_raw_list[:3]
 
 
 async def retrieve_and_calc_temperature_params(
@@ -346,7 +364,7 @@ async def retrieve_and_calc_temperature_params(
     end_date: str,
     offset: str,
     limit: str,
-) -> float:
+) -> Tuple[float, list]:
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
     params = {
@@ -367,14 +385,15 @@ async def retrieve_and_calc_temperature_params(
             raise ConnectionError
         try:
             r_json = await resp.json()
-
             data_json = r_json["results"]
             result_set = r_json["metadata"]["resultset"]
         except json.decoder.JSONDecodeError:
-            return None  # TO DO: what to do here?
+            return None, None  # TO DO: what to do here?
         except KeyError:
-            return None  # TO DO: what to do here?
-        for raw in data_json:
-            avg_value += raw["value"]
-        avg_value /= result_set["count"]
-    return avg_value
+            return None, None  # TO DO: what to do here?
+
+        data_json.sort(key=lambda data: data["value"], reverse=True)
+        avg_value = sum(raw["value"] for raw in data_json) / result_set["count"]
+        max_temp_raws = data_json[:3]
+
+    return avg_value, max_temp_raws
