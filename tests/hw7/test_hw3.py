@@ -21,11 +21,11 @@ def test_tic_tac_toe_o_wins_in_diagonal():
     assert tic_tac_toe_checker(board) == "o wins!"
 
 
-def test_tic_tac_toe_draws_with_no_explicit_winners():
+def test_tic_tac_toe_drows_with_no_explicit_winners():
     board = [["o", "x", "o"], ["x", "o", "x"], ["x", "o", "x"]]
     assert tic_tac_toe_checker(board) == "draw!"
 
 
-def test_tic_tac_toe_draws_when_both_players_win():
+def test_tic_tac_toe_drows_when_both_players_win():
     board = [["x", "x", "o"], ["x", "o", "o"], ["x", "o", "o"]]
     assert tic_tac_toe_checker(board) == "draw!"

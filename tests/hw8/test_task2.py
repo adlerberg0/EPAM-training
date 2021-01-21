@@ -32,7 +32,7 @@ class TestClass:
             "Kekistan",
         )
 
-    def test_iterate_through_table_raws(self):
+    def test_iterate_through_table_rows(self):
         tmp_data = {
             "Yeltsin": ("Yeltsin", 999, "Russia"),
             "Trump": ("Trump", 1337, "US"),
