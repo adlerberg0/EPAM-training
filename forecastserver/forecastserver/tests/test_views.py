@@ -1,7 +1,9 @@
+import datetime
 from unittest import mock
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
+from forecast_app.api_requests import StationStatisticSummary
 from requests import Response
 from selenium.webdriver.firefox.webdriver import WebDriver
 
@@ -24,6 +26,45 @@ def mocked_city_view_requests_get(*args, **kwargs):
     response.status_code = 200
 
     return response
+
+
+def mocked_get_station_statistic(
+    annual_statistic_summary: StationStatisticSummary,
+    station_id: str,
+    start_date: datetime.date,
+    end_date: datetime.date,
+):
+    return StationStatisticSummary(
+        avg_temperature=-7.666666666666667,
+        avg_temperatures_per_year=[],
+        max_temp_date_list=[
+            {
+                "date": "2010-01-02T00:00:00",
+                "datatype": "TAVG",
+                "station": "GHCND:BOM00026941",
+                "attributes": "H,,S,",
+                "value": -5.6,
+            },
+            {
+                "date": "2010-01-01T00:00:00",
+                "datatype": "TAVG",
+                "station": "GHCND:BOM00026941",
+                "attributes": "H,,S,",
+                "value": -5.9,
+            },
+            {
+                "date": "2010-01-03T00:00:00",
+                "datatype": "TAVG",
+                "station": "GHCND:BOM00026941",
+                "attributes": "H,,S,",
+                "value": -11.5,
+            },
+        ],
+        total_days_with_precipitation=2,
+        total_days_without_precipitation=0,
+        total_days_with_snow=2,
+        avg_wind_speed=0,
+    )
 
 
 class IndexViewTest(StaticLiveServerTestCase):
@@ -207,7 +248,7 @@ class CitiesViewTest(StaticLiveServerTestCase):
                 "forecast_app:set_statistic_time_interval", args=["GHCND:BOM00026941"]
             ),
             self.selenium.current_url,
-        )  # TO DO: why 'forecast_app:city'?? should be statistic_time_interval/
+        )
 
 
 class SetStatisticTimeIntervalViewTest(StaticLiveServerTestCase):
@@ -266,4 +307,117 @@ class SetStatisticTimeIntervalViewTest(StaticLiveServerTestCase):
             response,
             reverse("forecast_app:get_station_statistic", args=["GHCND:BOM00026941"])
             + "?startdate=2010-01-01&enddate=2010-01-01",
+        )
+
+
+class GetStationStatisticTest(StaticLiveServerTestCase):
+    # fixtures = ['user-data.json']
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.selenium = WebDriver()
+        cls.selenium.implicitly_wait(10)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        super().tearDownClass()
+
+    @mock.AsyncMock(
+        "forecast_app.api_requests.retrieve_station_statistic",
+        side_effect=mocked_get_station_statistic,
+    )
+    def test_view_url_exists_at_desired_location(self, *args):
+        response = self.client.get(
+            "/forecast/station_statistic/GHCND:BOM00026850?startdate=2021-01-03&enddate=2021-01-04"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @mock.AsyncMock(
+        "forecast_app.api_requests.retrieve_station_statistic",
+        side_effect=mocked_get_station_statistic,
+    )
+    def test_view_url_accessible_by_name(self, *args):
+        response = self.client.get(
+            reverse("forecast_app:get_station_statistic", args=["GHCND:BOM00026850"])
+            + "?startdate=2021-01-03&enddate=2021-01-04"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @mock.AsyncMock(
+        "forecast_app.api_requests.retrieve_station_statistic",
+        side_effect=mocked_get_station_statistic,
+    )
+    def test_view_uses_correct_template(self, *args):
+        response = self.client.get(
+            reverse("forecast_app:get_station_statistic", args=["GHCND:BOM00026850"])
+            + "?startdate=2021-01-03&enddate=2021-01-04"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "forecast_app/station_statistic.html")
+
+    @mock.AsyncMock(
+        "forecast_app.api_requests.retrieve_station_statistic",
+        side_effect=mocked_get_station_statistic,
+    )
+    def test_statistic_result(self, *args):
+        response = self.client.get(
+            reverse("forecast_app:get_station_statistic", args=["GHCND:BOM00026850"])
+            + "?startdate=2021-01-03&enddate=2021-01-04"
+        )
+        print(response)
+        statistic_summary = StationStatisticSummary(
+            avg_temperature=-7.666666666666667,
+            avg_temperatures_per_year=[],
+            max_temp_date_list=[
+                {
+                    "date": "2010-01-02T00:00:00",
+                    "datatype": "TAVG",
+                    "station": "GHCND:BOM00026941",
+                    "attributes": "H,,S,",
+                    "value": -5.6,
+                },
+                {
+                    "date": "2010-01-01T00:00:00",
+                    "datatype": "TAVG",
+                    "station": "GHCND:BOM00026941",
+                    "attributes": "H,,S,",
+                    "value": -5.9,
+                },
+                {
+                    "date": "2010-01-03T00:00:00",
+                    "datatype": "TAVG",
+                    "station": "GHCND:BOM00026941",
+                    "attributes": "H,,S,",
+                    "value": -11.5,
+                },
+            ],
+            total_days_with_precipitation=2,
+            total_days_without_precipitation=0,
+            total_days_with_snow=2,
+            avg_wind_speed=0,
+        )
+
+        self.assertEqual(
+            response.context["avg_temperature"], statistic_summary.avg_temperature
+        )
+        self.assertEqual(
+            response.context["avg_temperature_per_year"],
+            statistic_summary.avg_temperatures_per_year,
+        )
+        self.assertEqual(
+            response.context["max_temp_date_list"], statistic_summary.max_temp_date_list
+        )
+        self.assertEqual(
+            response.context["precipitation_info"][0],
+            statistic_summary.total_days_with_precipitation,
+        )
+        self.assertEqual(
+            response.context["precipitation_info"][1],
+            statistic_summary.total_days_without_precipitation,
+        )
+        self.assertEqual(
+            response.context["precipitation_info"][2],
+            statistic_summary.total_days_with_snow,
         )

@@ -4,7 +4,7 @@ from django.test import TestCase
 from forecast_app.forms import DateRangeForm
 
 
-class RenewBookFormTest(TestCase):
+class DataRangeFormTest(TestCase):
     def test_date_range_form_fields_label(self):
         form = DateRangeForm(years=list(range(2010, 2022)))
 
@@ -31,7 +31,6 @@ class RenewBookFormTest(TestCase):
             years=list(range(2010, 2022)),
             auto_id=False,
         )
-        print(form.errors)
         self.assertTrue(form.is_valid())
 
     def test_date_range_form_with_equals_dates(self):
@@ -43,5 +42,4 @@ class RenewBookFormTest(TestCase):
             years=list(range(2010, 2022)),
             auto_id=False,
         )
-        print(form.errors)
         self.assertTrue(form.is_valid())

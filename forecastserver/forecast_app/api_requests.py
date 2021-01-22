@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import json
 import math
-import time
 from dataclasses import dataclass, field
 from typing import Tuple
 
@@ -138,15 +137,14 @@ async def precipitation_statistic_task(
             headers={"token": "ucyeHcqokRAJiVchQBAyvqGXGIbhOHjx"},
         ) as resp:
             if resp.status != 200:
-                print(await resp.text())
                 raise ConnectionError
             try:
                 r_json = await resp.json()
                 result_set = r_json["metadata"]["resultset"]
             except json.decoder.JSONDecodeError:
-                return None, None, None  # TO DO: what to do here?
+                return None, None, None
             except KeyError:
-                return None, None, None  # TO DO: what to do here?
+                return None, None, None
 
         limit = 1000
         last_page_num = math.ceil(result_set["count"] / limit)
@@ -211,15 +209,14 @@ async def retrieve_and_calc_precipitation_params(
         url=url, params=params, headers={"token": "ucyeHcqokRAJiVchQBAyvqGXGIbhOHjx"}
     ) as resp:
         if resp.status != 200:
-            print(await resp.text())
             raise ConnectionError
         try:
             r_json = await resp.json()
             data_json = r_json["results"]
         except json.decoder.JSONDecodeError:
-            return None, None, None  # TO DO: what to do here?
+            return None, None, None
         except KeyError:
-            return None, None, None  # TO DO: what to do here?
+            return None, None, None
 
         total_days_with_precipitation = 0
         total_days_without_precipitation = 0
@@ -257,7 +254,6 @@ async def temperature_statistic_task(
         "limit": 1,
         "offset": 0,
     }
-    time.sleep(3)
     async with aiohttp.ClientSession() as session:
         async with session.get(
             url=url,
@@ -265,18 +261,14 @@ async def temperature_statistic_task(
             headers={"token": "ucyeHcqokRAJiVchQBAyvqGXGIbhOHjx"},
         ) as resp:
             if resp.status != 200:
-                print(await resp.text())
-                print(await resp.text())
                 raise ConnectionError
             try:
                 r_json = await resp.json()
                 result_set = r_json["metadata"]["resultset"]
             except json.decoder.JSONDecodeError:
-                print("KEY ERROR")
-                return None, None  # TO DO: what to do here?
+                return None, None
             except KeyError:
-                print("JSON ERROR")
-                return None, None  # TO DO: what to do here?
+                return None, None
 
         limit = 1000
         last_page_num = math.ceil(result_set["count"] / limit)
@@ -335,17 +327,17 @@ async def retrieve_and_calc_temperature_params(
     async with session.get(
         url=url, params=params, headers={"token": "ucyeHcqokRAJiVchQBAyvqGXGIbhOHjx"}
     ) as resp:
+
         if resp.status != 200:
-            print(await resp.text())
             raise ConnectionError
         try:
             r_json = await resp.json()
             data_json = r_json["results"]
             result_set = r_json["metadata"]["resultset"]
         except json.decoder.JSONDecodeError:
-            return None, None  # TO DO: what to do here?
+            return None, None
         except KeyError:
-            return None, None  # TO DO: what to do here?
+            return None, None
 
         data_json.sort(key=lambda data: data["value"], reverse=True)
         avg_value = sum(raw["value"] for raw in data_json) / result_set["count"]

@@ -26,7 +26,6 @@ def choose_country(request: HttpRequest, page: int = 1) -> HttpResponse:
     r = requests.get(
         url=url, params=params, headers={"token": "ucyeHcqokRAJiVchQBAyvqGXGIbhOHjx"}
     )
-    # print(r.content)
 
     try:
         r_json = r.json()
@@ -111,7 +110,7 @@ def set_statistic_time_interval(request: HttpRequest, city_id: str) -> HttpRespo
             url += f"?startdate={form.cleaned_data['min_date']}&enddate={form.cleaned_data['max_date']}"
             return HttpResponseRedirect(url)
 
-        # if a GET (or any other method) we'll create a blank form
+    # if a GET (or any other method) we'll create a blank form
     else:
 
         form = DateRangeForm(years=list(range(2010, 2022)))

@@ -9,3 +9,5 @@ pytest-sugar
 Django~=3.1.4
 aiohttp~=3.7.3
 requests~=2.25.1
+selenium~=3.141.0
+aioresponses~=0.7.1
