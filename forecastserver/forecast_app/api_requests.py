@@ -61,13 +61,14 @@ async def retrieve_station_statistic(
         )
 
     await asyncio.gather(*annual_statistic_tasks_list)
+
     max_temp_date_list = []
+    temperature_samples_cnt = 0
     for item in annual_statistic_list:
         if item.avg_temperature is not None:
+            temperature_samples_cnt += 1
             statistic_summary.avg_temperature += item.avg_temperature
-        statistic_summary.avg_temperatures_per_year.append(item.avg_temperature)
-        if item.avg_wind_speed is not None:
-            statistic_summary.avg_wind_speed += item.avg_wind_speed
+            statistic_summary.avg_temperatures_per_year.append(item.avg_temperature)
         if item.max_temp_date_list is not None:
             max_temp_date_list.extend(item.max_temp_date_list)
         if item.total_days_with_precipitation is not None:
@@ -81,10 +82,12 @@ async def retrieve_station_statistic(
         if item.total_days_with_snow is not None:
             statistic_summary.total_days_with_snow += item.total_days_with_snow
 
-    max_temp_date_list.sort(key=lambda data: data["value"], reverse=True)
-    statistic_summary.avg_temperature /= len(annual_statistic_list)
-    statistic_summary.avg_wind_speed /= len(annual_statistic_list)
-    statistic_summary.max_temp_date_list = max_temp_date_list[:3]
+    if temperature_samples_cnt:
+        statistic_summary.avg_temperature /= temperature_samples_cnt
+
+    if max_temp_date_list:
+        max_temp_date_list.sort(key=lambda data: data["value"], reverse=True)
+        statistic_summary.max_temp_date_list = max_temp_date_list[:3]
 
 
 async def get_annual_statistic(

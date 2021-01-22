@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 class DateRangeForm(forms.Form):
@@ -14,3 +15,8 @@ class DateRangeForm(forms.Form):
             self.fields["max_date"] = forms.DateField(
                 label="Max date", widget=forms.SelectDateWidget(years=years)
             )
+
+    # method to validate both fields
+    def clean(self):
+        if self.cleaned_data["min_date"] > self.cleaned_data["max_date"]:
+            raise ValidationError("min_date could not be older than max_date")

@@ -20,6 +20,6 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("forecast/", include("forecast_app.urls")),
+    path("forecast/", include("forecast_app.urls"), name="forecast"),
     path("admin/", admin.site.urls),
 ]

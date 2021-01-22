@@ -26,6 +26,7 @@ def choose_country(request: HttpRequest, page: int = 1) -> HttpResponse:
     r = requests.get(
         url=url, params=params, headers={"token": "ucyeHcqokRAJiVchQBAyvqGXGIbhOHjx"}
     )
+    # print(r.content)
 
     try:
         r_json = r.json()
@@ -57,7 +58,7 @@ def choose_city(request: HttpRequest, country_id: str, page: int = 1) -> HttpRes
 
     params = {
         "locationid": country_id,
-        "datatypeid": ["TAVG", "SNWD", "PRCP"],
+        "datatypeid": ["TAVG"],  # ["TAVG", "SNWD", "PRCP"],
         "sortfield": "name",
         "startdate": "2010-01-01",
         "enddate": "2022-01-01",
