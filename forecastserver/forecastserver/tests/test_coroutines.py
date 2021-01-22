@@ -391,11 +391,11 @@ class MyAppTestCase(TestCase):
 
         self.assertEqual(result, expected_result)
 
-    @mock.patch(
+    @mock.AsyncMock(
         "forecast_app.api_requests.temperature_statistic_task",
         side_effect=mocked_temperature_statistic_task,
     )
-    @mock.patch(
+    @mock.AsyncMock(
         "forecast_app.api_requests.precipitation_statistic_task",
         side_effect=mocked_precipitation_statistic_task,
     )
@@ -445,52 +445,52 @@ class MyAppTestCase(TestCase):
 
         self.assertEqual(statistic_summary, expected_value)
 
-        @mock.patch(
-            "forecast_app.api_requests.get_annual_statistic",
-            side_effect=mocked_get_annual_statistic,
+    @mock.AsyncMock(
+        "forecast_app.api_requests.get_annual_statistic",
+        side_effect=mocked_get_annual_statistic,
+    )
+    def test_retrieve_station_statistic(self, *args):
+        loop = asyncio.get_event_loop()
+        statistic_summary = StationStatisticSummary()
+        loop.run_until_complete(
+            retrieve_station_statistic(
+                statistic_summary,
+                "GHCND:BOM00026850",
+                "2010-01-03",
+                "2010-01-04",
+            )
         )
-        def test_retrieve_station_statistic(self, mocked, *args):
-            loop = asyncio.get_event_loop()
-            statistic_summary = StationStatisticSummary()
-            loop.run_until_complete(
-                retrieve_station_statistic(
-                    statistic_summary,
-                    "GHCND:BOM00026850",
-                    datetime.date.fromisoformat("2010-01-03"),
-                    datetime.date.fromisoformat("2010-01-04"),
-                )
-            )
 
-            expected_value = StationStatisticSummary(
-                avg_temperature=-7.666666666666667,
-                avg_temperatures_per_year=[],
-                max_temp_date_list=[
-                    {
-                        "date": "2010-01-02T00:00:00",
-                        "datatype": "TAVG",
-                        "station": "GHCND:BOM00026941",
-                        "attributes": "H,,S,",
-                        "value": -5.6,
-                    },
-                    {
-                        "date": "2010-01-01T00:00:00",
-                        "datatype": "TAVG",
-                        "station": "GHCND:BOM00026941",
-                        "attributes": "H,,S,",
-                        "value": -5.9,
-                    },
-                    {
-                        "date": "2010-01-03T00:00:00",
-                        "datatype": "TAVG",
-                        "station": "GHCND:BOM00026941",
-                        "attributes": "H,,S,",
-                        "value": -11.5,
-                    },
-                ],
-                total_days_with_precipitation=2,
-                total_days_without_precipitation=0,
-                total_days_with_snow=2,
-                avg_wind_speed=0,
-            )
+        expected_value = StationStatisticSummary(
+            avg_temperature=-7.666666666666667,
+            avg_temperatures_per_year=[],
+            max_temp_date_list=[
+                {
+                    "date": "2010-01-02T00:00:00",
+                    "datatype": "TAVG",
+                    "station": "GHCND:BOM00026941",
+                    "attributes": "H,,S,",
+                    "value": -5.6,
+                },
+                {
+                    "date": "2010-01-01T00:00:00",
+                    "datatype": "TAVG",
+                    "station": "GHCND:BOM00026941",
+                    "attributes": "H,,S,",
+                    "value": -5.9,
+                },
+                {
+                    "date": "2010-01-03T00:00:00",
+                    "datatype": "TAVG",
+                    "station": "GHCND:BOM00026941",
+                    "attributes": "H,,S,",
+                    "value": -11.5,
+                },
+            ],
+            total_days_with_precipitation=2,
+            total_days_without_precipitation=0,
+            total_days_with_snow=2,
+            avg_wind_speed=0,
+        )
 
-            self.assertEqual(statistic_summary, expected_value)
+        self.assertEqual(statistic_summary, expected_value)
