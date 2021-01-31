@@ -2,6 +2,7 @@ import datetime
 from unittest import mock
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import SimpleTestCase
 from django.urls import reverse
 from forecast_app.api_requests import StationStatisticSummary
 from requests import Response
@@ -68,8 +69,6 @@ def mocked_get_station_statistic(
 
 
 class IndexViewTest(StaticLiveServerTestCase):
-    # fixtures = ['user-data.json']
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -101,8 +100,6 @@ class IndexViewTest(StaticLiveServerTestCase):
 
 
 class CountriesViewTest(StaticLiveServerTestCase):
-    # fixtures = ['user-data.json']
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -170,8 +167,6 @@ class CountriesViewTest(StaticLiveServerTestCase):
 
 
 class CitiesViewTest(StaticLiveServerTestCase):
-    # fixtures = ['user-data.json']
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -252,18 +247,13 @@ class CitiesViewTest(StaticLiveServerTestCase):
         )
 
 
-class SetStatisticTimeIntervalViewTest(StaticLiveServerTestCase):
-    # fixtures = ['user-data.json']
-
+class SetStatisticTimeIntervalViewTest(SimpleTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver()
-        cls.selenium.implicitly_wait(30)
 
     @classmethod
     def tearDownClass(cls):
-        cls.selenium.quit()
         super().tearDownClass()
 
     def test_view_url_exists_at_desired_location(self):
@@ -308,12 +298,11 @@ class SetStatisticTimeIntervalViewTest(StaticLiveServerTestCase):
             response,
             reverse("forecast_app:get_station_statistic", args=["GHCND:BOM00026941"])
             + "?startdate=2010-01-01&enddate=2010-01-01",
+            fetch_redirect_response=False,
         )
 
 
 class GetStationStatisticTest(StaticLiveServerTestCase):
-    # fixtures = ['user-data.json']
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
