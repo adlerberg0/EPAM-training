@@ -145,6 +145,7 @@ class CountriesViewTest(StaticLiveServerTestCase):
         )
 
         self.selenium.find_element_by_id("go_ahead").click()
+
         self.assertIn(
             reverse("forecast_app:country", args=[2]), self.selenium.current_url
         )
@@ -366,7 +367,6 @@ class GetStationStatisticTest(StaticLiveServerTestCase):
             reverse("forecast_app:get_station_statistic", args=["GHCND:BOM00026850"])
             + "?startdate=2021-01-03&enddate=2021-01-04"
         )
-        print(response)
         statistic_summary = StationStatisticSummary(
             avg_temperature=-7.666666666666667,
             avg_temperatures_per_year=[],

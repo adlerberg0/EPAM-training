@@ -3,20 +3,20 @@ import datetime
 import json
 import math
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import Optional, Tuple
 
 import aiohttp
 
 
 @dataclass()
 class StationStatisticSummary:
-    avg_temperature: float = 0
-    avg_temperatures_per_year: list = field(default_factory=lambda: [])
-    max_temp_date_list: list = field(default_factory=lambda: [])
-    total_days_with_precipitation: int = 0
-    total_days_without_precipitation: int = 0
-    total_days_with_snow: int = 0
-    avg_wind_speed: float = 0
+    avg_temperature: float = None
+    avg_temperatures_per_year: list = field(default_factory=list)
+    max_temp_date_list: list = field(default_factory=list)
+    total_days_with_precipitation: int = None
+    total_days_without_precipitation: int = None
+    total_days_with_snow: int = None
+    avg_wind_speed: float = None
 
 
 async def retrieve_station_statistic(
@@ -99,25 +99,29 @@ async def get_annual_statistic(
         temperature_statistic_task(station_id, start_date, end_date)
     )
     await temperature_task
-    (
-        annual_statistic_summary.avg_temperature,
-        annual_statistic_summary.max_temp_date_list,
-    ) = temperature_task.result()
+    task_result = temperature_task.result()
+    if task_result is not None:
+        (
+            annual_statistic_summary.avg_temperature,
+            annual_statistic_summary.max_temp_date_list,
+        ) = task_result
 
     precipitation_task = asyncio.create_task(
         precipitation_statistic_task(station_id, start_date, end_date)
     )
     await precipitation_task
-    (
-        annual_statistic_summary.total_days_with_precipitation,
-        annual_statistic_summary.total_days_without_precipitation,
-        annual_statistic_summary.total_days_with_snow,
-    ) = precipitation_task.result()
+    task_result = precipitation_task.result()
+    if task_result is not None:
+        (
+            annual_statistic_summary.total_days_with_precipitation,
+            annual_statistic_summary.total_days_without_precipitation,
+            annual_statistic_summary.total_days_with_snow,
+        ) = task_result
 
 
 async def precipitation_statistic_task(
     station_id: str, start_date: datetime.date, end_date: datetime.date
-) -> Tuple[int, int, int]:
+) -> Optional[Tuple[int, int, int]]:
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
     params = {
@@ -138,13 +142,15 @@ async def precipitation_statistic_task(
         ) as resp:
             if resp.status != 200:
                 raise ConnectionError
+
+            # return None in case of errors
             try:
                 r_json = await resp.json()
                 result_set = r_json["metadata"]["resultset"]
             except json.decoder.JSONDecodeError:
-                return None, None, None
+                return None
             except KeyError:
-                return None, None, None
+                return None
 
         limit = 1000
         last_page_num = math.ceil(result_set["count"] / limit)
@@ -170,17 +176,23 @@ async def precipitation_statistic_task(
         total_days_with_precipitation = 0
         total_days_without_precipitation = 0
         total_days_with_snow = 0
+        result_cnt = 0
         for task in task_list:
-            tsk_result_with, tsk_result_without, tsk_result_snow = task.result()
-            total_days_with_precipitation += tsk_result_with
-            total_days_without_precipitation += tsk_result_without
-            total_days_with_snow += tsk_result_snow
-
-        return (
-            total_days_with_precipitation,
-            total_days_without_precipitation,
-            total_days_with_snow,
-        )
+            task_result = task.result()
+            if task_result is not None:
+                tsk_result_with, tsk_result_without, tsk_result_snow = task.result()
+                total_days_with_precipitation += tsk_result_with
+                total_days_without_precipitation += tsk_result_without
+                total_days_with_snow += tsk_result_snow
+                result_cnt += 1
+        if result_cnt == 0:
+            return None
+        else:
+            return (
+                total_days_with_precipitation,
+                total_days_without_precipitation,
+                total_days_with_snow,
+            )
 
 
 async def retrieve_and_calc_precipitation_params(
@@ -191,7 +203,7 @@ async def retrieve_and_calc_precipitation_params(
     end_date: str,
     offset: str,
     limit: str,
-) -> Tuple[int, int, int]:
+) -> Optional[Tuple[int, int, int]]:
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
     params = {
@@ -210,13 +222,15 @@ async def retrieve_and_calc_precipitation_params(
     ) as resp:
         if resp.status != 200:
             raise ConnectionError
+
+        # return None in case of errors
         try:
             r_json = await resp.json()
             data_json = r_json["results"]
         except json.decoder.JSONDecodeError:
-            return None, None, None
+            return None
         except KeyError:
-            return None, None, None
+            return None
 
         total_days_with_precipitation = 0
         total_days_without_precipitation = 0
@@ -241,7 +255,7 @@ async def retrieve_and_calc_precipitation_params(
 
 async def temperature_statistic_task(
     station_id: str, start_date: datetime.date, end_date: datetime.date
-) -> Tuple[float, list]:
+) -> Optional[Tuple[float, list]]:
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
     params = {
@@ -262,13 +276,15 @@ async def temperature_statistic_task(
         ) as resp:
             if resp.status != 200:
                 raise ConnectionError
+
+            # return None in case of errors
             try:
                 r_json = await resp.json()
                 result_set = r_json["metadata"]["resultset"]
             except json.decoder.JSONDecodeError:
-                return None, None
+                return None
             except KeyError:
-                return None, None
+                return None
 
         limit = 1000
         last_page_num = math.ceil(result_set["count"] / limit)
@@ -293,13 +309,21 @@ async def temperature_statistic_task(
 
         avg_value = 0
         max_temp_raw_list = []
+        res_cnt = 0
         for task in retrieve_and_calc_temperature_task_list:
-            temperature, max_temp_raw = task.result()
-            avg_value += temperature
-            max_temp_raw_list.extend(max_temp_raw)
-        avg_value /= last_page_num
-        max_temp_raw_list.sort(key=lambda data: data["value"], reverse=True)
-        return avg_value, max_temp_raw_list[:3]
+            task_result = task.result()
+            if task_result is not None:
+                temperature, max_temp_raw = task.result()
+                avg_value += temperature
+                max_temp_raw_list.extend(max_temp_raw)
+                res_cnt += 1
+
+        if res_cnt == 0:
+            return None
+        else:
+            avg_value /= res_cnt
+            max_temp_raw_list.sort(key=lambda data: data["value"], reverse=True)
+            return avg_value, max_temp_raw_list[:3]
 
 
 async def retrieve_and_calc_temperature_params(
@@ -310,7 +334,7 @@ async def retrieve_and_calc_temperature_params(
     end_date: str,
     offset: str,
     limit: str,
-) -> Tuple[float, list]:
+) -> Optional[Tuple[float, list]]:
     # params for request
     url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data"
     params = {
@@ -330,14 +354,16 @@ async def retrieve_and_calc_temperature_params(
 
         if resp.status != 200:
             raise ConnectionError
+
+        # return None in case of errors
         try:
             r_json = await resp.json()
             data_json = r_json["results"]
             result_set = r_json["metadata"]["resultset"]
         except json.decoder.JSONDecodeError:
-            return None, None
+            return None
         except KeyError:
-            return None, None
+            return None
 
         data_json.sort(key=lambda data: data["value"], reverse=True)
         avg_value = sum(raw["value"] for raw in data_json) / result_set["count"]

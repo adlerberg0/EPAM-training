@@ -246,11 +246,11 @@ class MyAppTestCase(TestCase):
 
         self.assertEqual(result, expected_result)
 
-    @aioresponses()
-    @mock.patch(
+    @mock.AsyncMock(
         "forecast_app.api_requests.retrieve_and_calc_temperature_params",
         side_effect=mocked_retrieve_and_calc_temperature_params,
     )
+    @aioresponses()
     def test_temperature_statistic_task(self, mocked, *args):
         loop = asyncio.get_event_loop()
         text = {
@@ -352,16 +352,15 @@ class MyAppTestCase(TestCase):
                 "0",
             )
         )
-
         expected_result = 2, 0, 2
 
         self.assertEqual(result, expected_result)
 
-    @aioresponses()
-    @mock.patch(
+    @mock.AsyncMock(
         "forecast_app.api_requests.retrieve_and_calc_precipitation_params",
         side_effect=mocked_retrieve_and_calc_precipitation_params,
     )
+    @aioresponses()
     def test_precipitation_statistic_task(self, mocked, *args):
         loop = asyncio.get_event_loop()
         text = {
