@@ -73,7 +73,7 @@ class IndexViewTest(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.selenium = WebDriver()
-        cls.selenium.implicitly_wait(10)
+        cls.selenium.implicitly_wait(30)
 
     @classmethod
     def tearDownClass(cls):
